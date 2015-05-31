@@ -23,8 +23,9 @@ skynet.start(function()
 	-- 启动各个数据中心，config表与common表数据加载到各个数据中心内存
 	local dc = snax.uniqueservice("testdc")
 
+	LOG_INFO("begin entity test ...")
 	-- 以下假设uid = 1的玩家登录
-	dc.req.load(1)
+	dc.req.load(1)		-- 加载uid = 1的玩家的SingleEntity与MultiEntity到数据中心内存
 
 	print("UserSingleEntity test")
 	print(dc.req.user_get(1))	-- 打印uid = 1的玩家记录
@@ -51,4 +52,6 @@ skynet.start(function()
 	print(dc.req.item_getvalue(1, 1, { "itemid", "superposition" }))
 
 	dc.req.item_setvalue(1, 1, "superposition", 100)
+
+	LOG_INFO("end entity test ...")
 end)
