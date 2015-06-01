@@ -354,6 +354,16 @@ static inline void* worker_func(void* p)
 	return NULL;
 }
 
+static void log_exit()
+{
+	inst.running = 0;
+	pthread_join(inst.thread, NULL);
+	pthread_mutex_destroy(&inst.mutex);
+	pthread_cond_destroy(&inst.cond);
+	if (inst.handle)
+		fclose(inst.handle);
+}
+
 int linit(lua_State *L)
 {
 	memset(&inst, 0, sizeof(inst));
@@ -402,13 +412,8 @@ int linit(lua_State *L)
 }
 
 int lexit(lua_State *L)
-{	
-	inst.running = 0;
-	pthread_join(inst.thread, NULL);
-	pthread_mutex_destroy(&inst.mutex);
-	pthread_cond_destroy(&inst.cond);
-	if (inst.handle)
-		fclose(inst.handle);
+{
+	log_exit();
 	return 0;
 }
 
@@ -479,7 +484,8 @@ int lfatal(lua_State *L)
 	}
 	char msg[LOG_MAX];
 	snprintf(msg, sizeof(msg), "[FATAL] %s\n", data);
-	fwrite_unlocked(msg, 1, strlen(msg), inst.handle);
+	append(msg, strlen(msg));
+	log_exit();
 	abort();
 	return 0;
 }

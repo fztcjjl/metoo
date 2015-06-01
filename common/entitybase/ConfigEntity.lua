@@ -41,7 +41,7 @@ function ConfigEntity:Get(...)
 		end
 	end
 
-	return self.recordset[key]
+	return self.recordset[key] or {}
 end
 
 
