@@ -87,18 +87,18 @@ string.split = function(s, delim)
     return split
 end
 
-string.ltrim = function(s, pattern)
-    pattern = pattern or "%s+"
-    return (string.gsub(s, "^" .. pattern, ""))
+string.ltrim = function(s, c)
+    local pattern = "^" .. (c or "%s") .. "+"
+    return (string.gsub(s, pattern, ""))
 end
 
-string.rtrim = function(s, pattern)
-    pattern = pattern or "%s+"
-    return (string.gsub(s, pattern .. "$", ""))
+string.rtrim = function(s, c)
+    local pattern = (c or "%s") .. "+" .. "$"
+    return (string.gsub(s, pattern, ""))
 end
 
-string.trim = function(s, pattern)
-    return string.rtrim(string.ltrim(s, pattern), pattern)
+string.trim = function(s, c)
+    return string.rtrim(string.ltrim(s, c), c)
 end
 
 local function dump(obj)
