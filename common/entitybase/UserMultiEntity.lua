@@ -141,13 +141,15 @@ function UserMultiEntity:Get(uid, id, field)
 	local record
 	if self.recordset[uid] then
 		if not field then
-			record = self.recordset[uid][id]
+			record = self.recordset[uid][id] or {}
 		elseif type(field) == "string" then
+			if not self.recordset[uid][id] then return end
 			record = self.recordset[uid][id][field]
 		elseif type(field) == "table" then
 			record = {}
+			local t = self.recordset[uid][id]
+			if not t then return record end
 			for i=1, #field do
-				local t = self.recordset[uid][id]
 				record[field[i]] = t[field[i]]
 			end
 		end
