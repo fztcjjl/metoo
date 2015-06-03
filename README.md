@@ -1,8 +1,8 @@
 ## Build
 
 ```
-git clone https://github.com/fztcjjl/metoo.git<br />
-cd metoo<br />
+git clone https://github.com/fztcjjl/metoo.git
+cd metoo
 make
 ```
 
