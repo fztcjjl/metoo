@@ -1,0 +1,21 @@
+package netmsg;
+
+message Header {
+	optional int32 uid = 1;
+}
+
+message ErrMsg {
+	optional int32 code = 1 [default = 0];
+	optional string desc = 2;
+}
+
+message NetMsg {
+	optional Header head = 1;
+	optional string name = 2;
+	optional bytes payload = 3;
+	optional ErrMsg errmsg = 4;
+}
+
+message LogoutRequest {
+	
+}

@@ -1,5 +1,5 @@
 local skynet = require "skynet"
---local protobuf = require "protobuf"
+local protobuf = require "protobuf"
 
 function do_redis(args, uid)
 	local cmd = assert(args[1])
@@ -30,6 +30,26 @@ end
 function LOG_FATAL(fmt, ...)
 	local msg = string.format(fmt, ...)
 	skynet.send("log", "lua", "fatal", SERVICE_NAME, msg)
+end
+
+function pb_encode(name, msg)
+	if not msg then
+		LOG_ERROR("msg is nil")
+	end
+
+	local data = protobuf.encode(name, msg)
+	if not data then
+		LOG_ERROR("pb_encode error")
+	end
+	return name, data
+end
+
+function pb_decode(data)
+	local msg = protobuf.decode(data.name, data.payload)
+	if data.uid then
+		msg.uid = data.uid
+	end
+	return msg
 end
 
 function check( ... )

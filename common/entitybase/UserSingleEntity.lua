@@ -133,7 +133,7 @@ function UserSingleEntity:Get(uid, field)
 	if type(field) == "string" then
 		field = { field }
 	end
-	record = skynet.call("dbmgr", "lua", "get_user_single", self.tbname, uid, field) --不存在返回空的table {}
+	record = skynet.call("dbmgr", "lua", "get_user_single", self.tbname, uid) --不存在返回空的table {}
 	if not table.empty(record) then
 		self.recordset[uid] = record
 

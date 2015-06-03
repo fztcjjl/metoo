@@ -1,0 +1,11 @@
+package user;
+
+// 角色初始化
+message RoleInitRequest {
+	required string name = 1;
+}
+
+message RoleInitResonpse {
+
+}
+

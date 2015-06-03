@@ -162,7 +162,7 @@ function UserMultiEntity:Get(uid, id, field)
 	if type(field) == "string" then
 		field = { field }
 	end
-	record = skynet.call("dbmgr", "lua", "get_user_multi", self.tbname, uid, id, field)
+	record = skynet.call("dbmgr", "lua", "get_user_multi", self.tbname, uid, id)
 	if not table.empty(record) then
 		if not self.recordset[uid] then
 			self.recordset[uid] = {}
