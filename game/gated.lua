@@ -11,12 +11,17 @@ local agent_pool = {}
 
 server.expired_number = 128
 
+local max_agent
+local curr_agent
 function server.init_handler()
-	LOG_INFO("precreate %d agents", 10)
-	for i = 1, 10 do
-		local agent = assert(skynet.newservice("msgagent"), string.format("precreate agent %d of %d error", i, 10))
+	local n = (tonumber(skynet.getenv("maxclient")) or 1024) // 10
+	LOG_INFO("precreate %d agents", n)
+	for i = 1, n do
+		local agent = assert(skynet.newservice("msgagent"), string.format("precreate agent %d of %d error", i, n))
 		table.insert(agent_pool, agent)
 	end
+	max_agent = 2 * n
+	curr_agent = n
 end
 
 -- 与游服握手成功后回调
@@ -34,14 +39,22 @@ end
 -- 玩家登录 登录服务器成功后，调用此函数登录游戏服务器
 function server.login_handler(uid, secret)
 	if users[uid] then
-		error(string.format("%s is already login", uid))
+		local errmsg = string.format("%s is already login", uid)
+		LOG_ERROR(errmsg)
+		error(errmsg)
 	end
 
 	internal_id = internal_id + 1
 	local username = msgserver.username(uid, internal_id, NODE_NAME)
 	local agent = table.remove(agent_pool)
 	if not agent then
-		agent = skynet.newservice "msgagent"
+		if curr_agent < max_agent then
+			agent = skynet.newservice "msgagent"
+			curr_agent = curr_agent + 1
+		else
+			LOG_ERROR("too many agents")
+			error("too many agents")
+		end
 	end
 
 	local u = {

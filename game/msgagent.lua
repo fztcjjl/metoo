@@ -12,14 +12,104 @@ local SECRET
 local user_dc
 local afktime = 0
 
---用于统计执行信息
------------------------------------bench begin-------------------
+local gate		-- 游戏服务器gate地址
+local CMD = {}
+
+local worker_co
+local running = false
+
 local ti = {}
 setmetatable(ti, { __mode = "k" })
 
-local gate		-- 游戏服务器gate地址
+local function update_ti(name, usetime)
+	if ti[name] then
+		ti[name].count = ti[name].count + 1
+		ti[name].time = ti[name].time + usetime
+	else
+		ti[name] = { count = 1, time = usetime }
+	end
+end
 
-local CMD = {}
+local function timing()
+	return ti
+end
+
+
+local timer_list = {}
+
+local function add_timer(id, interval, f)
+	local timer_node = {}
+	timer_node.id = id
+	timer_node.interval = interval
+	timer_node.callback = f
+	timer_node.trigger_time = skynet.now() + interval
+
+	timer_list[id] = timer_node
+end
+
+local function del_timer(id)
+	timer_list[id] = nil
+end
+
+local function clear_timer()
+	timer_list = {}
+end
+
+local function dispatch_timertask()
+	local now = skynet.now()
+	for k, v in pairs(timer_list) do
+		if now >= v.trigger_time then
+			v.callback()
+			v.trigger_time = now + v.interval
+		end
+	end
+end
+
+local function worker()
+	local t = skynet.now()
+	while true do
+		dispatch_timertask()
+		local n = skynet.now() + 100 - t
+		skynet.sleep(n)
+		t = t + 100
+	end
+end
+
+local function logout()
+	if running then
+		running = false
+		skynet.wakeup(worker_co)	-- 通知协程退出
+	end
+
+	if gate then
+		skynet.call(gate, "lua", "logout", UID, SUB_ID)
+	end
+
+	gate = nil
+	UID = nil
+	SUB_ID = nil
+	SECRET = nil
+
+	ti = {}
+	afktime = 0
+
+	skynet.call("dcmgr", "lua", "unload", UID)	-- 卸载玩家数据
+	--这里不退出agent服务，以便agent能复用
+	--skynet.exit()	-- 玩家显示登出，需要退出agent服务
+end
+
+-- 空闲登出
+local function idle()
+	if afktime > 0 then
+		if skynet.time() - afktime >= 60 then		-- 玩家断开连接后一分钟强制登出
+			logout()
+		end
+	end
+end
+
+local function reg_timers()
+	add_timer(1, 500, idle)
+end
 
 -- 玩家登录游服后调用
 function CMD.login(source, uid, subid, secret)
@@ -40,24 +130,12 @@ function CMD.auth(source, uid)
 	LOG_INFO(string.format("%s is real login", uid))
 	LOG_INFO("call dcmgr to load user data uid=%d", uid)
 	skynet.call("dcmgr", "lua", "load", uid)	-- 加载玩家数据，重复加载是无害的
-end
 
-local function logout()
-	if gate then
-		skynet.call(gate, "lua", "logout", UID, SUB_ID)
+	if not running then
+		running = true
+		reg_timers()
+		worker_co = skynet.fork(worker)
 	end
-
-	gate = nil
-	UID = nil
-	SUB_ID = nil
-	SECRET = nil
-
-	ti = {}
-	afktime = 0
-
-	skynet.call("dcmgr", "lua", "unload", UID)	-- 卸载玩家数据
-	--这里不退出agent服务，以便agent能复用
-	--skynet.exit()	-- 玩家显示登出，需要退出agent服务
 end
 
 function CMD.logout(source)
@@ -71,21 +149,6 @@ function CMD.afk(source)
 	afktime = skynet.time()
 	skynet.error(string.format("AFK"))
 end
-
-local function update_ti(name, usetime)
-	if ti[name] then
-		ti[name].count = ti[name].count + 1
-		ti[name].time = ti[name].time + usetime
-	else
-		ti[name] = { count = 1, time = usetime }
-	end
-end
-
-local function timing()
-	return ti
-end
------------------------------------bench end---------------------
-
 
 local function msg_unpack(msg, sz)
 	local data = netpack.tostring(msg, sz, 0) --必须为0,否则这边会直接被free掉,会造成coredump
