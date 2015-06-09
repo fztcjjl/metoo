@@ -18,6 +18,8 @@ skynet.start(function()
 	local log = skynet.uniqueservice("log")
 	skynet.call(log, "lua", "start")
 	
+	skynet.newservice("debug_console", tonumber(skynet.getenv("debug_port")))
+
 	local dbmgr = skynet.uniqueservice("dbmgr")
 	skynet.call(dbmgr, "lua", "start", config, user, common)
 

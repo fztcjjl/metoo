@@ -2,14 +2,13 @@ local skynet = require "skynet"
 local queue = require "skynet.queue"
 local snax = require "snax"
 local netpack = require "netpack"
-local profile = require "profile"
 local protobuf = require "protobuf"
 
 local cs = queue()
 local UID
 local SUB_ID
 local SECRET
-local user_dc
+--local user_dc
 local afktime = 0
 
 local gate		-- 游戏服务器gate地址
@@ -17,23 +16,6 @@ local CMD = {}
 
 local worker_co
 local running = false
-
-local ti = {}
-setmetatable(ti, { __mode = "k" })
-
-local function update_ti(name, usetime)
-	if ti[name] then
-		ti[name].count = ti[name].count + 1
-		ti[name].time = ti[name].time + usetime
-	else
-		ti[name] = { count = 1, time = usetime }
-	end
-end
-
-local function timing()
-	return ti
-end
-
 
 local timer_list = {}
 
@@ -122,7 +104,6 @@ function CMD.login(source, uid, subid, secret)
 
 	ti = {}
 	afktime = 0
-	-- you may load user data from database
 end
 
 -- 玩家登录游服，握手成功后调用
@@ -191,7 +172,6 @@ local function msg_dispatch(netmsg)
 		return logout()
 	end
 
-	profile.start()
 	local name = netmsg.name
 	LOG_INFO("calling to %s", name)
 	local module, method = netmsg.name:match "([^.]*).(.*)"
@@ -214,9 +194,8 @@ local function msg_dispatch(netmsg)
 		data.errmsg = format_errmsg(errno, errmsg)
 	end
 
-	update_ti(netmsg.name, profile.stop())
 	local result = msg_pack(data)
-	LOG_DEBUG("dispatch over:%f, %s",skynet.time()-begin, name)
+	LOG_DEBUG("process %s time used %f ms", name, (skynet.time()-begin)*10)
 
 	return result
 end
@@ -242,5 +221,5 @@ skynet.start(function()
 	end)
 
 	protobuf.register_file("./protocol/netmsg.pb")
-	user_dc = snax.uniqueservice("userdc")
+	--user_dc = snax.uniqueservice("userdc")
 end)

@@ -26,18 +26,7 @@ end
 
 function response.RoleInitRequest(data)
 	local args = pb_decode(data)
-	local uid = args.uid
-	local username = args.name
-	if not user_dc.req.check_role_exists(uid) then
-		local ret = role_obj.req.roleinit(uid, username)
-		if not ret then
-			return nil, nil, ErrorCode.E_DB_ERROR
-		end
-	else
-		LOG_ERROR("uid %d has role, role init failed", uid)
-		return nil, nil, ErrorCode.E_ROLE_EXISTS
-	end
-
+	local errno = role_obj.req.roleinit(args.uid, args.name)
 	local name, resp = pb_encode("user.RoleInitResonpse", {})
-	return name, resp
+	return name, resp, errno
 end

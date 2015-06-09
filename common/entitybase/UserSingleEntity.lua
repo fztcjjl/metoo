@@ -23,7 +23,7 @@ end
 function UserSingleEntity:Load(uid)
 	if not self.recordset[uid] then
 		local record = skynet.call("dbmgr", "lua", "load_user_single", self.tbname, uid)
-		if record then
+		if not table.empty(record) then
 			self.recordset[uid] = record
 		end
 	end

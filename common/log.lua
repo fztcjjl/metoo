@@ -7,7 +7,7 @@ local CMD = {}
 function CMD.start()
 	logger.init(tonumber(skynet.getenv("log_level")) or 0,
 		tonumber(skynet.getenv("log_rollsize")) or 1024,
-		tonumber(skynet.getenv("log_flushinterval") or 5),
+		tonumber(skynet.getenv("log_flushinterval")) or 5,
 		skynet.getenv("log_dirname") or "log",
 		skynet.getenv("log_basename") or "test")
 end

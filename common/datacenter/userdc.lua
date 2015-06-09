@@ -57,9 +57,15 @@ function response.get(uid)
 end
 
 function response.check_rolename_exists(name)
-	return EntUserCustom:Get(name)
+	if table.empty(EntUserCustom:Get(name)) then
+		return false
+	end
+	return true
 end
 
 function response.check_role_exists(uid)
-	return EntUser:GetValue(uid, "name")
+	if not EntUser:GetValue(uid, "uid") then
+		return false
+	end
+	return true
 end

@@ -12,6 +12,12 @@ function exit(...)
 end
 
 function response.roleinit(uid, name)
+	local errno = E_SUCCESS
+	if user_dc.req.check_role_exists(uid) then
+		LOG_ERROR("uid %d has role, role init failed", uid)
+		return ErrorCode.E_ROLE_EXISTS
+	end
+
 	local data = {
 		uid = uid,
 		name = name,
@@ -24,5 +30,9 @@ function response.roleinit(uid, name)
 	local ret = user_dc.req.add(data)
 	
 	-- 初始化角色其他数据
-	return ret
+
+	if not ret then
+		return ErrorCode.E_DB_ERROR
+	end
+	return errno
 end

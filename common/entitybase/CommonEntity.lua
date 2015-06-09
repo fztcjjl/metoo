@@ -112,7 +112,6 @@ function CommonEntity:Get(...)
 	local key
 	if #t == 1 then
 		key = t[1]
-		return self.recordset[key]
 	else
 		key = ""
 		for i = 1, #t do

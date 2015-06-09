@@ -6,6 +6,8 @@ harbor = 0
 start = "main"	-- main script
 bootstrap = "snlua bootstrap"	-- The service for bootstrap
 
+debug_port = 8001
+
 -- 集群名称配置文件
 cluster = "./cluster/clustername.lua"
 nodename = "game"

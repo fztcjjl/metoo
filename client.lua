@@ -184,14 +184,14 @@ end
 function CMD.roleinit(token, sdkid, name)
 	CMD.login(token, sdkid, true)
 
-	print("uid=" .. UID)
 	local data = { name = name }
 	send_request(encode("user.RoleInitRequest", data))
 	local ok, msg, sess = recv_response(read_package())
-	print(ok, msg, sess)
 	msg = decode(msg)
 	if msg.errmsg.code == 0 then
 		print("role init succ")
+	else
+		print(string.format("error with code=%d", msg.errmsg.code))
 	end
 end
 
