@@ -39,7 +39,7 @@ local function assert_socket(v, fd)
 	if v then
 		return v
 	else
-		LOG_DEBUG(string.format("auth failed: socket (fd = %d) closed", fd))
+		LOG_ERROR(string.format("auth failed: socket (fd = %d) closed", fd))
 		error(socket_error)
 	end
 end
@@ -75,6 +75,7 @@ local function launch_slave(auth_handler)
 		local handshake = read(fd)
 		local clientkey = crypt.base64decode(handshake)
 		if #clientkey ~= 8 then
+			LOG_ERROR("Invalid client key")
 			error "Invalid client key"
 		end
 		local serverkey = crypt.randomkey()
@@ -87,6 +88,7 @@ local function launch_slave(auth_handler)
 
 		if hmac ~= crypt.base64decode(response) then
 			write(fd, "400 Bad Request\n")
+			LOG_ERROR("challenge failed")
 			error "challenge failed"
 		end
 
@@ -131,8 +133,8 @@ local function accept(conf, s, fd, addr)
 	-- 一个用户在走登录流程时，禁止同一用户在别处登录
 	if not conf.multilogin then
 		if user_login[uid] then
-			LOG_DEBUG("406 Not Acceptable uid=%d", uid)
 			write(fd, "406 Not Acceptable")
+			LOG_ERROR("406 Not Acceptable uid=%d", uid)
 			error(string.format("User %s is already login", uid))
 		end
 

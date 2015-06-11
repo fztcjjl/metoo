@@ -49,9 +49,9 @@ end
 
 local function worker()
 	local t = skynet.now()
-	while true do
+	while running do
 		dispatch_timertask()
-		local n = skynet.now() + 100 - t
+		local n = 100 + t - skynet.now()
 		skynet.sleep(n)
 		t = t + 100
 	end
@@ -96,7 +96,7 @@ end
 -- 玩家登录游服后调用
 function CMD.login(source, uid, subid, secret)
 	-- you may use secret to make a encrypted data stream
-	LOG_INFO(string.format("%s is login", uid))
+	LOG_INFO(string.format("%d is login", uid))
 	gate = source
 	UID = uid
 	SUB_ID = subid
@@ -108,7 +108,7 @@ end
 
 -- 玩家登录游服，握手成功后调用
 function CMD.auth(source, uid)
-	LOG_INFO(string.format("%s is real login", uid))
+	LOG_INFO(string.format("%d is real login", uid))
 	LOG_INFO("call dcmgr to load user data uid=%d", uid)
 	skynet.call("dcmgr", "lua", "load", uid)	-- 加载玩家数据，重复加载是无害的
 
@@ -132,7 +132,7 @@ function CMD.afk(source)
 end
 
 local function msg_unpack(msg, sz)
-	local data = netpack.tostring(msg, sz, 0) --必须为0,否则这边会直接被free掉,会造成coredump
+	local data = netpack.tostring(msg, sz, 0) -- 必须为0, 否则会产生double free
 	local netmsg = protobuf.decode("netmsg.NetMsg", data)
 
 	if not netmsg then
@@ -195,7 +195,7 @@ local function msg_dispatch(netmsg)
 	end
 
 	local result = msg_pack(data)
-	LOG_DEBUG("process %s time used %f ms", name, (skynet.time()-begin)*10)
+	LOG_INFO("process %s time used %f ms", name, (skynet.time()-begin)*10)
 
 	return result
 end

@@ -20,7 +20,7 @@ local function register(token, sdkid)
 	--local uid = do_redis({ "incr", "d_account:id" })
 	local uid = account_dc.req.get_nextid()
 	if uid < 1 then
-		LOG_DEBUG("register account get nextid failed")
+		LOG_ERROR("register account get nextid failed")
 		return
 	end
 
@@ -28,7 +28,7 @@ local function register(token, sdkid)
 	local ret = account_dc.req.add(row)
 
 	if not ret then
-		LOG_DEBUG("register account failed")
+		LOG_ERROR("register account failed")
 		return
 	end
 
@@ -63,6 +63,7 @@ function server.auth_handler(args)
 	LOG_INFO("auth_handler is performing server=%s token=%s sdkid=%d", server, token, sdkid)
 	local uid = auth(token, sdkid)
 	if not uid then
+		LOG_ERROR("auth failed")
 		error("auth failed")
 	end
 	return server, uid
@@ -70,7 +71,7 @@ end
 
 -- 认证成功后，回调此函数，登录游戏服务器
 function server.login_handler(server, uid, secret)
-	LOG_INFO(string.format("%s@%s is login, secret is %s", uid, server, crypt.hexencode(secret)))
+	LOG_INFO(string.format("%d@%s is login, secret is %s", uid, server, crypt.hexencode(secret)))
 	-- only one can login, because disallow multilogin
 	local last = user_online[uid]
 	-- 如果该用户已经在某个服务器上登录了，先踢下线
@@ -84,13 +85,15 @@ function server.login_handler(server, uid, secret)
 
 	-- login_handler会被并发，可能同一用户在另一处中又登录了，所以再次确认是否登录
 	if user_online[uid] then
-		error(string.format("user %s is already online", uid))
+		LOG_ERROR("user %d is already online", uid)
+		error(string.format("user %d is already online", uid))
 	end
 
 	-- 登录游戏服务器
 	LOG_INFO(string.format("uid=%d is logging to gameserver %s ...", uid, server))
 	local ok, subid = pcall(cluster.call, server, "gated", "login", uid, secret)
 	if not ok then
+		LOG_ERROR("login gameserver error")
 		error("login gameserver error")
 	end
 	LOG_INFO(string.format("uid=%d logged on gameserver %s subid=%d ...", uid, server, subid))
