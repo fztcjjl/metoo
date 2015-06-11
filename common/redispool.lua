@@ -31,7 +31,7 @@ function CMD.start()
 			db:flushdb() --测试期，清理redis数据
 			table.insert(pool, db)
 		else
-			skynet.error("mysql connect error")
+			skynet.error("redis connect error")
 		end
 	end
 end
