@@ -41,7 +41,7 @@ end
 
 -- row中包含pk字段,row为k,v形式table
 -- 内存中不存在，则添加，并同步到redis
-function CommonEntity:Add(row)
+function CommonEntity:Add(row, nosync)
 	if row.id and self.recordset[row.id] then return end		-- 记录已经存在，返回
 
 	local id = row[self.pk]
@@ -50,7 +50,7 @@ function CommonEntity:Add(row)
 		row[self.pk] = id
 	end
 
-	local ret = skynet.call("dbmgr", "lua", "add", self.tbname, row, self.type)
+	local ret = skynet.call("dbmgr", "lua", "add", self.tbname, row, self.type, nosync)
 
 	if ret then
 		key = self:GetKey(row)
@@ -62,11 +62,11 @@ end
 
 -- row中包含pk字段,row为k,v形式table
 -- 从内存中删除，并同步到redis
-function CommonEntity:Delete(row)
+function CommonEntity:Delete(row, nosync)
 	local id = row[self.pk]
 	if not self.recordset[id] then return end		-- 记录不存在，返回
 
-	local ret = skynet.call("dbmgr", "lua", "delete", self.tbname, row, self.type)
+	local ret = skynet.call("dbmgr", "lua", "delete", self.tbname, row, self.type, nosync)
 
 	if ret then
 		key = self:GetKey(row)
@@ -89,12 +89,12 @@ function CommonEntity:Remove(row)
 end
 
 -- row中包含pk字段,row为k,v形式table
-function CommonEntity:Update(row)
+function CommonEntity:Update(row, nosync)
 	local id = row[self.pk]
 	if not self.recordset[id] then return end		-- 记录不存在，返回
 	
 
-	local ret = skynet.call("dbmgr", "lua", "update", self.tbname, row, 3)
+	local ret = skynet.call("dbmgr", "lua", "update", self.tbname, row, self.type, nosync)
 
 	if ret then
 		key = self:GetKey(row)

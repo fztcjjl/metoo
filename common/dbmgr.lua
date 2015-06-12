@@ -313,9 +313,9 @@ function CMD.hmset(uid, key, t)
 	end
 
 	local db = getconn(uid)
-	local result = db:hmset(key, table.unpack(data))
+	db:hmset(key, table.unpack(data))
 
-	return result
+	return true
 end
 
 -- 从redis获取user类型表单行数据，如果不存在，则从mysql加载
@@ -413,7 +413,7 @@ function CMD.get_user_multi(tbname, uid, id, fields)
 end
 
 -- redis中增加一行记录，并同步到mysql
-function CMD.add(tbname, row, type)
+function CMD.add(tbname, row, type, nosync)
 
 	local config 
 	if type == 1 then
@@ -438,31 +438,32 @@ function CMD.add(tbname, row, type)
 		do_redis({ "zadd", tbname..":index:"..linkey, 0, rediskey }, uid)
 	end
 
-	local columns
-	local values
-	for k, v in pairs(row) do
-		if not columns then
-			columns = k
-		else
-			columns = columns .. "," .. k
+	if not nosync then
+		local columns
+		local values
+		for k, v in pairs(row) do
+			if not columns then
+				columns = k
+			else
+				columns = columns .. "," .. k
+			end
+			
+			if not values then
+				values = "'" .. v .. "'"
+			else
+				values = values .. "," .. "'" .. v .. "'"
+			end
 		end
-		
-		if not values then
-			values = "'" .. v .. "'"
-		else
-			values = values .. "," .. "'" .. v .. "'"
-		end
+
+		local sql = "insert into " .. tbname .. "(" .. columns .. ") values(" .. values .. ")"
+		skynet.call("dbsync", "lua", "sync", sql)
 	end
-
-	local sql = "insert into " .. tbname .. "(" .. columns .. ") values(" .. values .. ")"
-
-	skynet.call("dbsync", "lua", "sync", sql)
 
 	return true
 end
 
 -- redis中删除一行记录，并同步到mysql
-function CMD.delete(tbname, row, type)
+function CMD.delete(tbname, row, type, nosync)
 	local config 
 	if type == 1 then
 		config = config_table[tbname]
@@ -488,16 +489,17 @@ function CMD.delete(tbname, row, type)
 		do_redis({ "zrem", tbname .. ":index:" .. linkey }, uid)
 	end
 
-	local sql = "delete from " .. tbname.. " where " .. pk .. "=" .. "'" .. row[pk] .. "'"
-
-	skynet.call("dbsync", "lua", "sync", sql)
+	if not nosync then
+		local sql = "delete from " .. tbname.. " where " .. pk .. "=" .. "'" .. row[pk] .. "'"
+		skynet.call("dbsync", "lua", "sync", sql)
+	end
 
 	return true
 
 end
 
 -- redis中更新一行记录，并同步到mysql
-function CMD.update(tbname, row, type)
+function CMD.update(tbname, row, type, nosync)
 	local config 
 	if type == 1 then
 		config = config_table[tbname]
@@ -517,20 +519,22 @@ function CMD.update(tbname, row, type)
 
 	do_redis({ "hmset", tbname .. ":" .. rediskey, row }, uid)
 
-	local setvalues = ""
+	if not nosync then
+		local setvalues = ""
 
-	for k, v in pairs(row) do
-		setvalues = setvalues .. k .. "='" .. v .. "',"
+		for k, v in pairs(row) do
+			setvalues = setvalues .. k .. "='" .. v .. "',"
+		end
+
+		setvalues = setvalues:trim(",")
+
+		local pk = schema[tbname]["pk"]
+		local sql = "update " .. tbname .. " set " .. setvalues .. " where " .. pk .. "='" .. row[pk] .. "'"
+
+		skynet.call("dbsync", "lua", "sync", sql)
 	end
 
-	setvalues = setvalues:trim(",")
-
-	local pk = schema[tbname]["pk"]
-	local sql = "update " .. tbname .. " set " .. setvalues .. " where " .. pk .. "='" .. row[pk] .. "'"
-
-	skynet.call("dbsync", "lua", "sync", sql)
-
-	return true
+	return result
 end
 
 function CMD.get_table_key(tbname, type)

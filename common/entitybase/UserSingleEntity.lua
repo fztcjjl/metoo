@@ -52,7 +52,7 @@ end
 
 -- record中包含uid字段（如果表主键是uid字段，不需要包含）,record为k,v形式table
 -- 内存中不存在，则添加，并同步到redis
-function UserSingleEntity:Add(record)
+function UserSingleEntity:Add(record, nosync)
 	if record.uid and self.recordset[record.uid] then return end		-- 记录已经存在，返回
 
 	local id = record[self.pk]
@@ -61,7 +61,7 @@ function UserSingleEntity:Add(record)
 		record[self.pk] = id
 	end
 
-	local ret = skynet.call("dbmgr", "lua", "add", self.tbname, record, self.type)
+	local ret = skynet.call("dbmgr", "lua", "add", self.tbname, record, self.type, nosync)
 	if ret then
 		self.recordset[record.uid] = record
 	end
@@ -71,10 +71,10 @@ end
 
 -- record中包含uid字段,record为k,v形式table
 -- 从内存中删除，并同步到redis
-function UserSingleEntity:Delete(record)
+function UserSingleEntity:Delete(record, nosync)
 	if not record.uid then return end
 
-	local ret = skynet.call("dbmgr", "lua", "delete", self.tbname, record, self.type)
+	local ret = skynet.call("dbmgr", "lua", "delete", self.tbname, record, self.type, nosync)
 	if ret then 
 		self.recordset[record.uid] = nil
 	end
@@ -92,10 +92,10 @@ function UserSingleEntity:Remove(record)
 end
 
 -- record中包含uid字段,record为k,v形式table
-function UserSingleEntity:Update(record)
+function UserSingleEntity:Update(record, nosync)
 	if not record.uid or not self.recordset[record.uid] then return end		-- 记录不存在，返回
 
-	local ret = skynet.call("dbmgr", "lua", "update", self.tbname, record, self.type)
+	local ret = skynet.call("dbmgr", "lua", "update", self.tbname, record, self.type, nosync)
 	if ret then
 		for k, v in pairs(record) do
 			self.recordset[record.uid][k] = v
