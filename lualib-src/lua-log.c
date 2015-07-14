@@ -149,6 +149,7 @@ void rollfile()
 			{
 				// 滚动日志文件
 				fclose(inst.handle);
+				inst.written_bytes = 0;
 				continue;
 			}
 
@@ -314,7 +315,6 @@ static inline void* worker_func(void* p)
 		if (inst.written_bytes > inst.rollsize)
 		{
 			rollfile();
-			inst.written_bytes = 0;
 		}
 
 		if (!new_buffer1)
