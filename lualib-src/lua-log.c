@@ -191,6 +191,7 @@ void append(const char* logline, size_t len)
 		// 将预备缓冲区设置为当前缓冲区
 		if (inst.next_buffer)
 		{
+			inst.curr_buffer->next = inst.next_buffer;
 			inst.curr_buffer = inst.next_buffer;
 			inst.next_buffer = NULL;
 		}
@@ -198,7 +199,9 @@ void append(const char* logline, size_t len)
 		{
 			// 这种情况，极少发生，前端写入速度太快，一下子把两块缓冲区都写完，
 			// 那么，只好分配一块新的缓冲区。
-			inst.curr_buffer = (struct buffer*)calloc(1, sizeof(struct buffer));
+			struct buffer* new_buffer = (struct buffer*)calloc(1, sizeof(struct buffer));
+			inst.curr_buffer->next = new_buffer;
+			inst.curr_buffer = new_buffer;
 		}
 		memcpy(inst.curr_buffer->data + inst.curr_buffer->size, logline, len);
 		inst.curr_buffer->size += len;
@@ -329,7 +332,7 @@ static inline void* worker_func(void* p)
 		if (!new_buffer2)
 		{
 			assert(buffers_to_write.size > 0);
-			new_buffer2 = buffers_to_write.head->next;
+			new_buffer2 = buffers_to_write.head;
 			buffers_to_write.head = buffers_to_write.head->next;
 			memset(new_buffer2, 0, sizeof(struct buffer));
 			buffers_to_write.size -= 1;
