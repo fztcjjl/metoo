@@ -104,7 +104,7 @@ function server.kick_handler(uid, subid)
 		pcall(skynet.call, u.agent, "lua", "logout")
 	else
 		--这里是为了防止msgserver崩溃后，未通知loginserver而导致卡号
-		pcall(cluster.call, "login", ".loginmaster", "logout", uid, subid)
+		pcall(cluster.call, "login", ".login_master", "logout", uid, subid)
 	end
 end
 
