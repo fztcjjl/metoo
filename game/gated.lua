@@ -128,12 +128,20 @@ function server.register_handler(name)
 
 end
 
+-- 获取所有的在线agent列表
 function server.get_agents()
 	local agnets = {}
 	for k, v in pairs(users) do
 		agents[k] = v.agent
 	end
 	return agents
+end
+
+-- 获取在线玩家uid所对应的agent
+function server.get_agent(uid)
+	if users[uid] then
+		return users[uid].agent
+	end
 end
 
 function server.is_online(uid)

@@ -136,6 +136,9 @@ function server.start(conf)
 		logout = assert(conf.logout_handler),
 		kick = assert(conf.kick_handler),
 		init = assert(conf.init_handler),		-- 主要用于初始化agent池
+		get_agents = assert(conf.get_agents),
+		get_agent = assert(conf.get_agent),
+		is_online = assert(conf.is_online),
 	}
 
 	-- 内部命令处理

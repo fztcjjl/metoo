@@ -75,3 +75,7 @@ end
 function check( ... )
 	-- body
 end
+
+function check_user_online(uid)
+	return skynet.call("gated", "lua", "is_online", uid)
+end
