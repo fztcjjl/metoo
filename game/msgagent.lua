@@ -19,6 +19,8 @@ local running = false
 
 local timer_list = {}
 
+local push_queue = {}	-- 推送数据队列
+
 local function add_timer(id, interval, f)
 	local timer_node = {}
 	timer_node.id = id
@@ -93,6 +95,29 @@ local function reg_timers()
 	add_timer(1, 500, idle)
 end
 
+local function do_server_push()
+	while true do
+		skynet.sleep(100)
+		if #push_queue > 0 then
+			local push_items = {}
+			for k, v in pairs(push_queue) do
+				local data = {}
+				data.name = v.name
+				data.payload = v.payload
+				table.insert(push_items, data)
+			end
+
+			local data = { push_items = push_items }
+			local name, payload = pb_encode("netmsg.ServerPushResponse", data)
+
+			local msg = { name = name, payload = payload }
+			local result = msg_pack(msg)
+
+			return result
+		end
+	end
+end
+
 -- 玩家登录游服后调用
 function CMD.login(source, uid, subid, secret)
 	-- you may use secret to make a encrypted data stream
@@ -129,6 +154,11 @@ function CMD.afk(source)
 	-- the connection is broken, but the user may back
 	afktime = skynet.time()
 	skynet.error(string.format("AFK"))
+end
+
+function CMD.push(source, name, payload)
+	local msg = { name = name, payload = payload }
+	table.insert(push_queue, msg)
 end
 
 local function msg_unpack(msg, sz)
@@ -170,6 +200,8 @@ local function msg_dispatch(netmsg)
 	assert(#netmsg.name > 0)
 	if netmsg.name == "netmsg.LogoutRequest" then
 		return logout()
+	elseif netmsg.name == "netmsg.ServerPushRequest" then
+		return do_server_push()
 	end
 
 	local name = netmsg.name

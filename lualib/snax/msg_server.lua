@@ -7,7 +7,6 @@ local socketdriver = require "socketdriver"
 local assert = assert
 local b64encode = crypt.base64encode
 local b64decode = crypt.base64decode
-local protobuf = require "protobuf"
 
 --[[
 
@@ -111,8 +110,8 @@ function server.login(username, secret)
 	assert(user_online[username] == nil)
 	user_online[username] = {
 		secret = secret,
-		version = 0,
-		index = 0,
+		version = 0,			-- 认证次数
+		index = 0,				-- 请求次数
 		username = username,
 		response = {},	-- response cache
 	}
@@ -126,7 +125,6 @@ function server.ip(username)
 end
 
 function server.start(conf)
-	--protobuf.register_file("protocol/netmsg.pb")
 	local expired_number = conf.expired_number or 128
 
 	local handler = {}
@@ -254,10 +252,10 @@ function server.start(conf)
 		local u = assert(connection[fd], "invalid fd")
 		local msg_sz = sz - 4
 		local session = netpack.tostring(msg, sz, msg_sz)
-		local p = u.response[session]
+		local p = u.response[session]	-- 从缓存中获取应答数据
 		if p then
 			-- session can be reuse in the same connection
-			if p[3] == u.version then
+			if p[3] == u.version then		-- 同一连接的请求，复用了先前的session
 				local last = u.response[session]
 				u.response[session] = nil
 				p = nil
@@ -271,7 +269,7 @@ function server.start(conf)
 
 		if p == nil then
 			p = { fd }
-			u.response[session] = p
+			u.response[session] = p			-- 缓存应答数据
 			local ok, result = pcall(conf.request_handler, u.username, msg, msg_sz)
 			result = result or ""
 			-- NOTICE: YIELD here, socket may close.
@@ -303,7 +301,7 @@ function server.start(conf)
 		if connection[fd] then
 			socketdriver.send(fd, p[2])
 		end
-		p[1] = nil
+		p[1] = nil		-- 用于标识同一连接，该请求已发送过
 		retire_response(u)
 	end
 
