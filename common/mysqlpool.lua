@@ -36,7 +36,7 @@ function CMD.start()
 		}
 		if db then
 			table.insert(pool, db)
-			db:query("set names utf8")
+			db:query("set charset utf8")
 		else
 			skynet.error("mysql connect error")
 		end
