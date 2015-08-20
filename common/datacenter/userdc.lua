@@ -1,15 +1,15 @@
 local skynet = require "skynet"
 local snax = require "snax"
-local entity = require "Entity"
+local EntityFactory = require "EntityFactory"
 
 local EntUser
 local EntUserCustom
 
 function init(...)
-	EntUser = entity.Get("d_user")
+	EntUser = EntityFactory.Get("d_user")
 	EntUser:Init()
 
-	EntUserCustom = entity.Get("d_user_custom")
+	EntUserCustom = EntityFactory.Get("d_user_custom")
 	EntUserCustom:Init()
 	EntUserCustom:Load()
 end

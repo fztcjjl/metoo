@@ -1,8 +1,8 @@
 local skynet = require "skynet"
-require "UserEntity"
+local UserEntity = require "UserEntity"
 
 -- UserSingleEntity
-UserSingleEntity = class(UserEntity)
+local UserSingleEntity = class("UserSingleEntity", UserEntity)
 
 -- self.recordset格式如下：
 --[[
@@ -13,6 +13,7 @@ UserSingleEntity = class(UserEntity)
 --]]
 
 function UserSingleEntity:ctor()
+	UserSingleEntity.super.ctor(self)
 	self.ismulti = false		-- 是否多行记录
 end
 
@@ -173,3 +174,5 @@ function UserSingleEntity:SetValue(uid, field, value)
 
 	return self:Update(record)
 end
+
+return UserSingleEntity

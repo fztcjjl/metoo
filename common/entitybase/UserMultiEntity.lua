@@ -1,8 +1,8 @@
 local skynet = require "skynet"
-require "UserEntity"
+local UserEntity = require "UserEntity"
 
 -- UserMultiEntity
-UserMultiEntity = class(UserEntity)
+local UserMultiEntity = class("UserMultiEntity", UserEntity)
 
 -- self.recordset格式如下：
 --[[
@@ -22,6 +22,7 @@ UserMultiEntity = class(UserEntity)
 
 
 function UserMultiEntity:ctor()
+	UserMultiEntity.super.ctor(self)
 	self.ismulti = true		-- 是否多行记录
 end
 
@@ -217,3 +218,5 @@ function UserMultiEntity:GetMulti(uid)
 	end
 	return rs
 end
+
+return UserMultiEntity

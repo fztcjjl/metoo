@@ -1,10 +1,11 @@
 local skynet = require "skynet"
-require "Entity"
+local Entity = require "Entity"
 
 -- 定义ConfigEntity类型
-ConfigEntity = class(Entity)
+local ConfigEntity = class("ConfigEntity", Entity)
 
 function ConfigEntity:ctor()
+	ConfigEntity.super.ctor(self)
 	self.type = 1
 end
 
@@ -48,3 +49,5 @@ end
 function ConfigEntity:GetAll( )
 	return self.recordset
 end
+
+return ConfigEntity

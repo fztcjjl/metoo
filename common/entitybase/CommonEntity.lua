@@ -1,11 +1,12 @@
 local skynet = require "skynet"
 local snax = require "snax"
-require "Entity"
+local Entity = require "Entity"
 
 -- CommonEntity
-CommonEntity = class(Entity)
+local CommonEntity = class("CommonEntity", Entity)
 
 function CommonEntity:ctor()
+	CommonEntity.super.ctor(self)
 	self.type = 3
 end
 
@@ -162,3 +163,5 @@ end
 function CommonEntity:GetAll( )
 	return self.recordset
 end
+
+return CommonEntity

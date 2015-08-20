@@ -1,7 +1,7 @@
 local skynet = require "skynet"
 
 -- 定义Entity类型
-Entity = class()
+local Entity = class("Entity")
 
 function Entity:ctor()
 	self.recordset = {}			-- 存放记录集
@@ -28,18 +28,4 @@ function Entity:Init()
 	--self.tbschema = skynet.call("dbmgr", "lua", "get_schema", self.tbname)
 end
 
-local M = {}
-local entities = {}		-- 保存实体对象
-
--- 工厂方法，获取具体对象，name为表名
-function M.Get(name)
-	if entities[name] then
-		return entities[name]
-	end
-
-	local ent = require(name)
-	entities[name] = ent
-	return ent
-end
-
-return M
+return Entity

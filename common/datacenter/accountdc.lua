@@ -1,11 +1,11 @@
 local skynet = require "skynet"
 local snax = require "snax"
-local entity = require "Entity"
+local EntityFactory = require "EntityFactory"
 
 local EntAccount
 
 function init(...)
-	EntAccount = entity.Get("d_account")
+	EntAccount = EntityFactory.Get("d_account")
 	EntAccount:Init()
 	EntAccount:Load()
 end
