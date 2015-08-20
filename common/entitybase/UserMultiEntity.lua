@@ -33,7 +33,7 @@ end
 function UserMultiEntity:Load(uid)
 
 	if not self.recordset[uid] then
-		local rs = skynet.call("dbmgr", "lua", "load_user_multi", self.tbname, uid)
+		local rs = skynet.call("dbmgr", "lua", "get_user_multi", self.tbname, uid)
 		if rs then
 			self.recordset[uid] = rs
 		end
