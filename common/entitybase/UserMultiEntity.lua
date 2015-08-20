@@ -145,17 +145,20 @@ function UserMultiEntity:Get(uid, id, field)
 			record = self.recordset[uid][id] or {}
 		elseif type(field) == "string" then
 			if not self.recordset[uid][id] then return end
-			record = self.recordset[uid][id][field]
+			if self.recordset[uid][id] then
+				record = self.recordset[uid][id][field]
+			end
 		elseif type(field) == "table" then
-			record = {}
 			local t = self.recordset[uid][id]
-			if not t then return record end
-			for i=1, #field do
-				record[field[i]] = t[field[i]]
+			if t then
+				record = {}
+				for i=1, #field do
+					record[field[i]] = t[field[i]]
+				end
 			end
 		end
 
-		return record
+		if record then return record end
 	end
 
 	-- 从redis获取，如果redis不存在，从mysql加载
