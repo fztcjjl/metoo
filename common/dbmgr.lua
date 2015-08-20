@@ -96,7 +96,7 @@ end
 
 local function load_data_impl(config, uid)
 	local tbname = config.name
-	local pk = get_primary_key(tbname)
+	local pk = schema[tbname]["pk"]
 	local offset = 0
 	local sql
 	local data = {}
@@ -153,7 +153,7 @@ local function load_common_data()
 end
 
 local function load_maxkey_impl(tbname)
-	local pk = get_primary_key(tbname)
+	local pk = schema[tbname]["pk"]
 	local sql = string.format("select max(%s) as maxkey from %s", pk, tbname)
 	local result = skynet.call("mysqlpool", "lua", "execute", sql)
 	if #result > 0 and not table.empty(result[1]) then
@@ -353,7 +353,7 @@ function CMD.get_user_multi(tbname, uid, id, fields)
 	local result
 	local ids = do_redis({ "zrange", tbname .. ":index:" .. uid, 0, -1 }, uid)
 
-	local pk = get_primary_key(tbname)
+	local pk = schema[tbname]["pk"]
 	if table.empty(ids) then
 		local t = CMD.load_user_multi(tbname, uid)
 
