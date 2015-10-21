@@ -248,11 +248,11 @@ function server.start(conf)
 		end
 	end
 
-	local function do_request(fd, msg, sz)
+	local function do_request(fd, message)
 		local u = assert(connection[fd], "invalid fd")
-		local msg_sz = sz - 4
-		local session = netpack.tostring(msg, sz, msg_sz)
-		local p = u.response[session]	-- 从缓存中获取应答数据
+		local session = string.unpack(">I4", message, -4)
+		message = message:sub(1,-5)
+		local p = u.response[session]
 		if p then
 			-- session can be reuse in the same connection
 			if p[3] == u.version then		-- 同一连接的请求，复用了先前的session
@@ -269,22 +269,23 @@ function server.start(conf)
 
 		if p == nil then
 			p = { fd }
-			u.response[session] = p			-- 缓存应答数据
-			local ok, result = pcall(conf.request_handler, u.username, msg, msg_sz)
-			result = result or ""
+			u.response[session] = p	-- 缓存应答数据
+			local ok, result = pcall(conf.request_handler, u.username, message)
 			-- NOTICE: YIELD here, socket may close.
+			result = result or ""
 			if not ok then
 				skynet.error(result)
-				result = "\0" .. session
+				result = string.pack(">BI4", 0, session)
+				--result = "\0" .. session
 			else
-				result = result .. '\1' .. session
+				result = result .. string.pack(">BI4", 1, session)
+				--result = result .. '\1' .. session
 			end
 
-			p[2] = netpack.pack_string(result)
+			p[2] = string.pack(">s2",result)
 			p[3] = u.version
 			p[4] = u.index
 		else
-			netpack.tostring(msg, sz) -- request before, so free msg
 			-- update version/index, change return fd.
 			-- resend response.
 			p[1] = fd
@@ -301,15 +302,16 @@ function server.start(conf)
 		if connection[fd] then
 			socketdriver.send(fd, p[2])
 		end
-		p[1] = nil		-- 用于标识同一连接，该请求已发送过
+		p[1] = nil
 		retire_response(u)
 	end
 
 	local function request(fd, msg, sz)
-		local ok, err = pcall(do_request, fd, msg, sz)
+		local message = netpack.tostring(msg, sz)
+		local ok, err = pcall(do_request, fd, message)
 		-- not atomic, may yield
 		if not ok then
-			skynet.error(string.format("Invalid package %s : %s", err, netpack.tostring(msg, sz)))
+			skynet.error(string.format("Invalid package %s : %s", err, message))
 			if connection[fd] then
 				gateserver.closeclient(fd)
 			end
