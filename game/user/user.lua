@@ -30,3 +30,10 @@ function response.RoleInitRequest(data)
 	local name, resp = pb_encode("user.RoleInitResonpse", {})
 	return name, resp, errno
 end
+
+function response.UserInfoRequest(data)
+	local args = pb_decode(data)
+	local userinfo = user_dc.req.get(args.uid)
+	local name, resp = pb_encode("user.UserInfoResponse", userinfo)
+	return name, resp
+end

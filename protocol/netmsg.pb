@@ -1,5 +1,5 @@
 
-Î
+Ê
 netmsg.protonetmsg"
 Header
 uid ("'
@@ -11,4 +11,11 @@
 name (	
 payload (
 errmsg (2.netmsg.ErrMsg"
-LogoutRequest
+LogoutRequest"
+ServerPushRequest")
+PushItem
+name (	
+payload (":
+ServerPushResponse$
+
+push_items (2.netmsg.PushItem

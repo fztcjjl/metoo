@@ -9,3 +9,15 @@ message RoleInitResonpse {
 
 }
 
+message UserInfoRequest {
+	
+}
+
+message UserInfoResponse {
+	optional int32 uid = 1;
+	optional string name = 2;
+	optional int32 level = 3;
+	optional int32 exp = 4;
+	optional int32 rtime = 5;
+	optional int32 ltime = 6;
+}
