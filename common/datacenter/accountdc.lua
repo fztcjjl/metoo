@@ -2,12 +2,12 @@ local skynet = require "skynet"
 local snax = require "snax"
 local EntityFactory = require "EntityFactory"
 
-local EntAccount
+local entAccount
 
 function init(...)
-	EntAccount = EntityFactory.Get("d_account")
-	EntAccount:Init()
-	EntAccount:Load()
+	entAccount = EntityFactory.get("d_account")
+	entAccount:init()
+	entAccount:load()
 end
 
 function exit(...)
@@ -15,21 +15,21 @@ function exit(...)
 end
 
 function response.add(row)
-	return EntAccount:Add(row)
+	return entAccount:add(row)
 end
 
 function response.delete(row)
-	return EntAccount:Delete(row)
+	return entAccount:delete(row)
 end
 
 function response.get(sdkid, pid)
-	return EntAccount:Get(sdkid, pid)
+	return entAccount:get(sdkid, pid)
 end
 
 function response.update(row)
-	return EntAccount:Update(row)
+	return entAccount:update(row)
 end
 
 function response.get_nextid()
-	return EntAccount:GetNextId()
+	return entAccount:getNextId()
 end

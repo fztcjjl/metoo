@@ -2,16 +2,16 @@ local skynet = require "skynet"
 local snax = require "snax"
 local EntityFactory = require "EntityFactory"
 
-local EntUser
-local EntUserCustom
+local entUser
+local entUserCustom
 
 function init(...)
-	EntUser = EntityFactory.Get("d_user")
-	EntUser:Init()
+	entUser = EntityFactory.get("d_user")
+	entUser:init()
 
-	EntUserCustom = EntityFactory.Get("d_user_custom")
-	EntUserCustom:Init()
-	EntUserCustom:Load()
+	entUserCustom = EntityFactory.get("d_user_custom")
+	entUserCustom:init()
+	entUserCustom:load()
 end
 
 function exit(...)
@@ -19,52 +19,52 @@ end
 
 function response.load(uid)
 	if not uid then return end
-	EntUser:Load(uid)
+	entUser:load(uid)
 end
 
 function response.unload(uid)
 	if not uid then return end
-	EntUser:UnLoad(uid)
+	entUser:unload(uid)
 end
 
 
 function response.getvalue(uid, key)
-	return EntUser:GetValue(uid, key)
+	return entUser:getValue(uid, key)
 end
 
 function response.setvalue(uid, key, value)
-	return EntUser:SetValue(uid, key, value)
+	return entUser:setValue(uid, key, value)
 end
 
 
 function response.add(row)
-	return EntUser:Add(row)
+	return entUser:add(row)
 end
 
 function response.delete(row)
-	return EntUser:Delete(row)
+	return entUser:delete(row)
 end
 
 function response.user_addvalue(uid, key, n)
-	local value = EntUser:GetValue(uid, key)
+	local value = entUser:getValue(uid, key)
 	value = value + n
-	local ret = EntUser:SetValue(uid, key, value)
+	local ret = entUser:setValue(uid, key, value)
 	return ret, value
 end
 
 function response.get(uid)
-	return EntUser:Get(uid)
+	return entUser:get(uid)
 end
 
 function response.check_rolename_exists(name)
-	if table.empty(EntUserCustom:Get(name)) then
+	if table.empty(entUserCustom:get(name)) then
 		return false
 	end
 	return true
 end
 
 function response.check_role_exists(uid)
-	if not EntUser:GetValue(uid, "uid") then
+	if not entUser:getValue(uid, "uid") then
 		return false
 	end
 	return true

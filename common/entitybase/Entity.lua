@@ -15,15 +15,12 @@ function Entity:ctor()
 	self.type = 0				-- 表类型：1、config，2、user，3、common
 end
 
-function Entity:dtor()
-end
-
 -- 获取redis下一个编号
-function Entity:GetNextId()
+function Entity:getNextId()
 	return do_redis({ "incr", self.tbname .. ":" .. self.pk })
 end
 
-function Entity:Init()
+function Entity:init()
 	self.pk, self.key, self.indexkey = skynet.call("dbmgr", "lua", "get_table_key", self.tbname, self.type)
 	--self.tbschema = skynet.call("dbmgr", "lua", "get_schema", self.tbname)
 end

@@ -10,7 +10,4 @@ function UserEntity:ctor()
 	self.type = 2
 end
 
-function UserEntity:dtor()
-end
-
 return UserEntity

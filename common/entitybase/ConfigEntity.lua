@@ -9,15 +9,11 @@ function ConfigEntity:ctor()
 	self.type = 1
 end
 
-function ConfigEntity:dtor()
+function ConfigEntity:init()
 
 end
 
-function ConfigEntity:Init()
-
-end
-
-function ConfigEntity:Load()
+function ConfigEntity:load()
 	--if table.empty(self.recordset) then
 		local rs = skynet.call("dbmgr", "lua", "get_config", self.tbname)
 		if rs then
@@ -26,7 +22,7 @@ function ConfigEntity:Load()
 	--end
 end
 
-function ConfigEntity:Get(...)
+function ConfigEntity:get(...)
 	local t = { ... }
 	assert(#t > 0)
 	local key
@@ -46,7 +42,7 @@ function ConfigEntity:Get(...)
 end
 
 
-function ConfigEntity:GetAll( )
+function ConfigEntity:getAll( )
 	return self.recordset
 end
 

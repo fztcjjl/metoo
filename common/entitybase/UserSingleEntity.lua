@@ -17,11 +17,8 @@ function UserSingleEntity:ctor()
 	self.ismulti = false		-- 是否多行记录
 end
 
-function UserSingleEntity:dtor()
-end
-
 -- 加载玩家数据
-function UserSingleEntity:Load(uid)
+function UserSingleEntity:load(uid)
 	if not self.recordset[uid] then
 		local record = skynet.call("dbmgr", "lua", "get_user_single", self.tbname, uid)
 		if not table.empty(record) then
@@ -32,12 +29,12 @@ function UserSingleEntity:Load(uid)
 end
 
 -- 将内存中的数据先同步回redis,再从redis加载到内存（该方法要不要待定）
-function UserSingleEntity:ReLoad(uid)
+function UserSingleEntity:reLoad(uid)
 
 end
 
 -- 卸载玩家数据
-function UserSingleEntity:UnLoad(uid)
+function UserSingleEntity:unload(uid)
 	local rs = self.recordset[uid]
 	if rs then
 		for k, v in pairs(rs) do
@@ -53,12 +50,12 @@ end
 
 -- record中包含uid字段（如果表主键是uid字段，不需要包含）,record为k,v形式table
 -- 内存中不存在，则添加，并同步到redis
-function UserSingleEntity:Add(record, nosync)
+function UserSingleEntity:add(record, nosync)
 	if record.uid and self.recordset[record.uid] then return end		-- 记录已经存在，返回
 
 	local id = record[self.pk]
 	if not id or id == 0 then
-		id = self:GetNextId()
+		id = self:getNextId()
 		record[self.pk] = id
 	end
 
@@ -72,7 +69,7 @@ end
 
 -- record中包含uid字段,record为k,v形式table
 -- 从内存中删除，并同步到redis
-function UserSingleEntity:Delete(record, nosync)
+function UserSingleEntity:delete(record, nosync)
 	if not record.uid then return end
 
 	local ret = skynet.call("dbmgr", "lua", "delete", self.tbname, record, self.type, nosync)
@@ -85,7 +82,7 @@ end
 
 -- record中包含uid字段,record为k,v形式table
 -- 仅从内存中移除，但不同步到redis
-function UserSingleEntity:Remove(record)
+function UserSingleEntity:remove(record)
 	if not record.uid or not self.recordset[record.uid] then return end		-- 记录不存在，返回
 	self.recordset[record.uid] = nil
 
@@ -93,7 +90,7 @@ function UserSingleEntity:Remove(record)
 end
 
 -- record中包含uid字段,record为k,v形式table
-function UserSingleEntity:Update(record, nosync)
+function UserSingleEntity:update(record, nosync)
 	if not record.uid or not self.recordset[record.uid] then return end		-- 记录不存在，返回
 
 	local ret = skynet.call("dbmgr", "lua", "update", self.tbname, record, self.type, nosync)
@@ -110,7 +107,7 @@ end
 -- field为空，获取整行记录，返回k,v形式table
 -- field为字符串表示获取单个字段的值，如果字段不存在，返回nil
 -- field为一个数组形式table，表示获取数组中指定的字段的值，返回k,v形式table
-function UserSingleEntity:Get(uid, field)
+function UserSingleEntity:get(uid, field)
 	-- 内存中存在
 	local record
 
@@ -150,9 +147,9 @@ end
 
 -- field为字符串表示获取单个字段的值
 -- field为一个数组形式table，表示获取数组中指定的字段的值，返回k,v形式table
-function UserSingleEntity:GetValue(uid, field)
+function UserSingleEntity:getValue(uid, field)
 	if not field then return end
-	local record = self:Get(uid, field)
+	local record = self:get(uid, field)
 	if record then
 		return record
 	end
@@ -161,7 +158,7 @@ end
 -- 成功返回true，失败返回false或nil
 -- 设置单个字段的值，field为字符串，value为值
 -- 设置多个字段的值，field为k,v形式table，value为空
-function UserSingleEntity:SetValue(uid, field, value)
+function UserSingleEntity:setValue(uid, field, value)
 	local record = {}
 	record["uid"] = uid
 	if value then
@@ -172,7 +169,7 @@ function UserSingleEntity:SetValue(uid, field, value)
 		end
 	end
 
-	return self:Update(record)
+	return self:update(record)
 end
 
 return UserSingleEntity

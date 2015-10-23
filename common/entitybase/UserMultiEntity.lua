@@ -26,11 +26,8 @@ function UserMultiEntity:ctor()
 	self.ismulti = true		-- 是否多行记录
 end
 
-function UserMultiEntity:dtor()
-end
-
 -- 加载玩家数据
-function UserMultiEntity:Load(uid)
+function UserMultiEntity:load(uid)
 
 	if not self.recordset[uid] then
 		local rs = skynet.call("dbmgr", "lua", "get_user_multi", self.tbname, uid)
@@ -41,12 +38,12 @@ function UserMultiEntity:Load(uid)
 end
 
 -- 将内存中的数据先同步回redis,再从redis加载到内存（该方法要不要待定）
-function UserMultiEntity:ReLoad(uid)
+function UserMultiEntity:reload(uid)
 
 end
 
 -- 卸载玩家数据
-function UserMultiEntity:UnLoad(uid)
+function UserMultiEntity:unload(uid)
 	local rs = self.recordset[uid]
 	if rs then
 		for k, v in pairs(rs) do
@@ -62,7 +59,7 @@ end
 
 -- record,record,v形式table
 -- 内存中不存在，则添加，并同步到redis
-function UserMultiEntity:Add(record, nosync)
+function UserMultiEntity:add(record, nosync)
 	
 	if not record.uid then return end
 
@@ -70,7 +67,7 @@ function UserMultiEntity:Add(record, nosync)
 	if self.recordset[record.uid] and self.recordset[record.uid][id] then return end		-- 记录已经存在，返回
 
 	if not id or id == 0 then
-		id = self:GetNextId()
+		id = self:getNextId()
 		record[self.pk] = id
 	end
 
@@ -87,7 +84,7 @@ end
 
 -- record中包含uid字段,record为k,v形式table
 -- 从内存中删除，并同步到redis
-function UserMultiEntity:Delete(record, nosync)
+function UserMultiEntity:delete(record, nosync)
 	if not record.uid then return end
 
 	local id = record[self.pk]
@@ -104,7 +101,7 @@ end
 
 -- record中包含uid字段,record为k,v形式table
 -- 仅从内存中移除，但不同步到redis
-function UserMultiEntity:Remove(record)
+function UserMultiEntity:remove(record)
 	if not record.uid then return end
 
 	local id = record[self.pk]
@@ -116,7 +113,7 @@ function UserMultiEntity:Remove(record)
 end
 
 -- record中包含uid字段,record为k,v形式table
-function UserMultiEntity:Update(record, nosync)
+function UserMultiEntity:update(record, nosync)
 	if not record.uid then return end
 
 	local id = record[self.pk]
@@ -134,9 +131,9 @@ function UserMultiEntity:Update(record, nosync)
 end
 
 -- 从内存中获取，如果不存在，说明是其他的离线玩家数据，则加载数据到redis
-function UserMultiEntity:Get(uid, id, field)
+function UserMultiEntity:get(uid, id, field)
 	if not id and not field then
-		return self:GetMulti(uid)
+		return self:getMulti(uid)
 	end
 
 	local record
@@ -183,8 +180,8 @@ function UserMultiEntity:Get(uid, id, field)
 end
 
 -- 获取单个字段的值,field为string，获取多个字段的值，field为table
-function UserMultiEntity:GetValue(uid, id, field)
-	local record = self:Get(uid, id, field)
+function UserMultiEntity:getValue(uid, id, field)
+	local record = self:get(uid, id, field)
 	if record then
 		return record
 	end
@@ -192,7 +189,7 @@ end
 
 -- 成功返回true，失败返回false
 -- 设置单个字段的值，field为string，data为值，设置多个字段的值,field为key,value形式table,data为nil
-function UserMultiEntity:SetValue(uid, id, field, value)
+function UserMultiEntity:setValue(uid, id, field, value)
 	local record = {}
 	id = id or uid
 	record["uid"] = uid
@@ -204,13 +201,13 @@ function UserMultiEntity:SetValue(uid, id, field, value)
 			record[k] = v
 		end
 	end
-	return self:Update(record)
+	return self:update(record)
 end
 
 
 -- 内部接口
 -- 多行记录，根据uid返回所有行
-function UserMultiEntity:GetMulti(uid)
+function UserMultiEntity:getMulti(uid)
 	local rs = self.recordset[uid]
 
 	if not rs then

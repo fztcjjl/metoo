@@ -10,15 +10,12 @@ function CommonEntity:ctor()
 	self.type = 3
 end
 
-function CommonEntity:Init()
+function CommonEntity:init()
 	self.pk, self.key, self.indexkey = skynet.call("dbmgr", "lua", "get_table_key", self.tbname, self.type)
 end
 
-function CommonEntity:dtor()
-end
-
 -- 加载整张表数据
-function CommonEntity:Load()
+function CommonEntity:load()
 	if table.empty(self.recordset) then
 		local rs = skynet.call("dbmgr", "lua", "get_common", self.tbname)
 		if rs then
@@ -42,19 +39,19 @@ end
 
 -- row中包含pk字段,row为k,v形式table
 -- 内存中不存在，则添加，并同步到redis
-function CommonEntity:Add(row, nosync)
+function CommonEntity:add(row, nosync)
 	if row.id and self.recordset[row.id] then return end		-- 记录已经存在，返回
 
 	local id = row[self.pk]
 	if not id or id == 0 then
-		id = self:GetNextId()
+		id = self:getNextId()
 		row[self.pk] = id
 	end
 
 	local ret = skynet.call("dbmgr", "lua", "add", self.tbname, row, self.type, nosync)
 
 	if ret then
-		key = self:GetKey(row)
+		key = self:getKey(row)
 		self.recordset[key] = row
 	end
 
@@ -63,14 +60,14 @@ end
 
 -- row中包含pk字段,row为k,v形式table
 -- 从内存中删除，并同步到redis
-function CommonEntity:Delete(row, nosync)
+function CommonEntity:delete(row, nosync)
 	local id = row[self.pk]
 	if not self.recordset[id] then return end		-- 记录不存在，返回
 
 	local ret = skynet.call("dbmgr", "lua", "delete", self.tbname, row, self.type, nosync)
 
 	if ret then
-		key = self:GetKey(row)
+		key = self:getKey(row)
 		self.recordset[key] = nil
 	end
 
@@ -79,18 +76,18 @@ end
 
 -- row中包含pk字段,row为k,v形式table
 -- 仅从内存中移除，但不同步到redis
-function CommonEntity:Remove(row)
+function CommonEntity:remove(row)
 	local id = row[self.pk]
 	if not self.recordset[id] then return end		-- 记录不存在，返回
 
-	key = self:GetKey(row)
+	key = self:getKey(row)
 	self.recordset[key] = nil
 
 	return true
 end
 
 -- row中包含pk字段,row为k,v形式table
-function CommonEntity:Update(row, nosync)
+function CommonEntity:update(row, nosync)
 	local id = row[self.pk]
 	if not self.recordset[id] then return end		-- 记录不存在，返回
 	
@@ -98,7 +95,7 @@ function CommonEntity:Update(row, nosync)
 	local ret = skynet.call("dbmgr", "lua", "update", self.tbname, row, self.type, nosync)
 
 	if ret then
-		key = self:GetKey(row)
+		key = self:getKey(row)
 		for k, v in pairs(row) do
 			self.recordset[key][k] = v
 		end
@@ -107,7 +104,7 @@ function CommonEntity:Update(row, nosync)
 	return true
 end
 
-function CommonEntity:Get(...)
+function CommonEntity:get(...)
 	local t = { ... }
 	assert(#t > 0)
 	local key
@@ -132,21 +129,21 @@ function CommonEntity:Set(id, row)
 end
 --]]
 
-function CommonEntity:GetValue(id, field)
-	local record = self:Get(id)
+function CommonEntity:getValue(id, field)
+	local record = self:get(id)
 	if not record then
 		return record[field]
 	end
 end
 
-function CommonEntity:SetValue(id, field, data)
+function CommonEntity:setValue(id, field, data)
 	local record = {}
 	record[self.pkfield] = id
 	record[field] = data
-	self:Update(record)
+	self:update(record)
 end
 
-function CommonEntity:GetKey(row)
+function CommonEntity:getKey(row)
 	local fields = string.split(self.key, ",")
 	local key
 	for i=1, #fields do
@@ -160,7 +157,7 @@ function CommonEntity:GetKey(row)
 	return tonumber(key) or key
 end
 
-function CommonEntity:GetAll( )
+function CommonEntity:getAll( )
 	return self.recordset
 end
 
