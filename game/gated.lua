@@ -14,13 +14,14 @@ server.expired_number = 128
 local max_agent
 local curr_agent
 function server.init_handler()
-	local n = (tonumber(skynet.getenv("maxclient")) or 1024) // 10
+	local maxclient = (tonumber(skynet.getenv("maxclient")) or 1024)
+	local n = maxclient // 10
 	LOG_INFO("precreate %d agents", n)
 	for i = 1, n do
 		local agent = assert(skynet.newservice("msgagent"), string.format("precreate agent %d of %d error", i, n))
 		table.insert(agent_pool, agent)
 	end
-	max_agent = 2 * n
+	max_agent = 2 * maxclient
 	curr_agent = n
 end
 
