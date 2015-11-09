@@ -162,7 +162,7 @@ function CMD.push(source, name, payload)
 end
 
 local function msg_unpack(msg, sz)
-	local data = netpack.tostring(msg, sz, 0) -- 必须为0, 否则会产生double free
+	local data = skynet.tostring(msg, sz)
 	local netmsg = protobuf.decode("netmsg.NetMsg", data)
 
 	if not netmsg then
