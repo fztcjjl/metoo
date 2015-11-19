@@ -31,27 +31,28 @@ Error Code:
 	406 Not Acceptable . already in login (disallow multi login)
 
 Success:
-	200 base64(subid)
+	200 base64(uid:subid)
 ]]
 
 local socket_error = {}
-local function assert_socket(v, fd)
+
+local function assert_socket(service, v, fd)
 	if v then
 		return v
 	else
-		LOG_ERROR(string.format("auth failed: socket (fd = %d) closed", fd))
+		LOG_ERROR(string.format("%s failed: socket (fd = %d) closed", service, fd))
 		error(socket_error)
 	end
 end
 
-local function write(fd, text)
+local function write(service, fd, text)
 	local sz = #text
 	local buf = string.char(sz >> 8) .. string.char(sz & 0xff) .. text
-	assert_socket(socket.write(fd, buf), fd)
+	assert_socket(service, socket.write(fd, buf), fd)
 end
 
-local function read(fd)
-	local ret = assert_socket(socket.read(fd, 2), fd)
+local function read(service, fd)
+	local ret = assert_socket(service, socket.read(fd, 2), fd)
 	local sz = (string.byte(ret) << 8) + string.byte(ret, 2)
 	assert(sz > 0, "error size " .. sz)
 
@@ -70,49 +71,58 @@ local function launch_slave(auth_handler)
 
 		local challenge = crypt.randomkey()
 		LOG_INFO(string.format("challenge is %s", crypt.base64encode(challenge)))
-		write(fd, crypt.base64encode(challenge))
+		write("auth", fd, crypt.base64encode(challenge))
 
-		local handshake = read(fd)
+		local handshake = read("auth", fd)
 		local clientkey = crypt.base64decode(handshake)
 		if #clientkey ~= 8 then
 			LOG_ERROR("Invalid client key")
 			error "Invalid client key"
 		end
 		local serverkey = crypt.randomkey()
-		write(fd, crypt.base64encode(crypt.dhexchange(serverkey)))
+		write("auth", fd, crypt.base64encode(crypt.dhexchange(serverkey)))
 
 		local secret = crypt.dhsecret(clientkey, serverkey)
 
-		local response = read(fd)
+		local response = read("auth", fd)
 		local hmac = crypt.hmac64(challenge, secret)
 
 		if hmac ~= crypt.base64decode(response) then
-			write(fd, "400 Bad Request\n")
+			write("auth", fd, "400 Bad Request\n")
 			LOG_ERROR("challenge failed")
 			error "challenge failed"
 		end
 
-		local etoken = read(fd)
+		local etoken = read("auth", fd)
 
 		local token = crypt.desdecode(secret, crypt.base64decode(etoken))
 
 		local ok, server, uid = pcall(auth_handler, token)
 
-		socket.abandon(fd)
 		return ok, server, uid, secret
 	end
 
-	local function ret_pack(ok, err, ...)
+	local function ret_pack(fd, ok, err, ...)
+		socket.abandon(fd)
 		if ok then
 			skynet.ret(skynet.pack(err, ...))
 		else
-			error(err)
+			if err == socket_error then
+				skynet.ret(skynet.pack(nil, "socket error"))
+			else
+				skynet.ret(skynet.pack(false, err))
+			end
 		end
 	end
 
-	skynet.dispatch("lua", function(_,_,...)
-		ret_pack(pcall(auth, ...))
+	skynet.dispatch("lua", function(_,_,fd,...)
+		if type(fd) ~= "number" then
+			skynet.ret(skynet.pack(false, "invalid fd type"))
+		else
+			ret_pack(fd,pcall(auth, fd, ...))
+		end
 	end)
+
 end
 
 local user_login = {}	-- key:uid value:true 表示玩家登录记录
@@ -125,15 +135,17 @@ local function accept(conf, s, fd, addr)
 
 	-- 认证失败
 	if not ok then
-		LOG_DEBUG("401 Unauthorized")
-		write(fd, "401 Unauthorized")
+		if ok ~= nil then
+			LOG_DEBUG("401 Unauthorized")
+			write("response 401", fd, "401 Unauthorized")
+		end
 		error(server)
 	end
 
 	-- 一个用户在走登录流程时，禁止同一用户在别处登录
 	if not conf.multilogin then
 		if user_login[uid] then
-			write(fd, "406 Not Acceptable")
+			write("response 406", fd, "406 Not Acceptable")
 			LOG_ERROR("406 Not Acceptable uid=%d", uid)
 			error(string.format("User %s is already login", uid))
 		end
@@ -147,10 +159,10 @@ local function accept(conf, s, fd, addr)
 
 	if ok then
 		err = err or ""
-		write(fd,  "200 "..crypt.base64encode(uid .. ":" .. err))
+		write("response 200", fd, "200 "..crypt.base64encode(uid .. ":" .. err))
 	else
 		LOG_DEBUG("403 Forbidden uid=%d", uid)
-		write(fd, "403 Forbidden")
+		write("response 403", fd, "403 Forbidden")
 		error(err)
 	end
 end

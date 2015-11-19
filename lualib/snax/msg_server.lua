@@ -71,7 +71,7 @@ Config for server.start:
 	conf.login_handler(uid, secret) -> subid : the function when a new user login, alloc a subid for it. (may call by login server)
 	conf.logout_handler(uid, subid) : the functon when a user logout. (may call by agent)
 	conf.kick_handler(uid, subid) : the functon when a user logout. (may call by login server)
-	conf.request_handler(username, session, msg, sz) : the function when recv a new request.
+	conf.request_handler(username, session, msg) : the function when recv a new request.
 	conf.register_handler(servername) : call when gate open
 	conf.disconnect_handler(username) : call when a connection disconnect (afk)
 ]]
@@ -190,7 +190,7 @@ function server.start(conf)
 		end
 
 		local text = string.format("%s:%s", username, index)
-		local v = crypt.hmac64(crypt.hashkey(text), u.secret)
+		local v = crypt.hmac_hash(u.secret, text)	-- equivalent to crypt.hmac64(crypt.hashkey(text), u.secret)
 		if v ~= hmac then
 			return "401 Unauthorized"
 		end
@@ -276,10 +276,8 @@ function server.start(conf)
 			if not ok then
 				skynet.error(result)
 				result = string.pack(">BI4", 0, session)
-				--result = "\0" .. session
 			else
 				result = result .. string.pack(">BI4", 1, session)
-				--result = result .. '\1' .. session
 			end
 
 			p[2] = string.pack(">s2",result)
