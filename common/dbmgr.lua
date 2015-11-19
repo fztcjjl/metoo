@@ -102,16 +102,16 @@ local function load_data_impl(config, uid)
 	local data = {}
 	while true do
 		if not uid then
-			if not config.fields then
+			if not config.columns then
 				sql = string.format("select * from %s order by %s asc limit %d, 1000", tbname, pk, offset)
 			else
-				sql = string.format("select %s from %s order by %s asc limit %d, 1000", config.fields, tbname, pk, offset)
+				sql = string.format("select %s from %s order by %s asc limit %d, 1000", config.columns, tbname, pk, offset)
 			end
 		else
-			if not config.fields then
+			if not config.columns then
 				sql = string.format("select * from %s where uid = %d order by %s asc limit %d, 1000", tbname, uid, pk, offset)
 			else
-				sql = string.format("select %s from %s where uid = %d order by %s asc limit %d, 1000", config.fields, tbname, uid, pk, offset)
+				sql = string.format("select %s from %s where uid = %d order by %s asc limit %d, 1000", config.columns, tbname, uid, pk, offset)
 			end
 		end
 
