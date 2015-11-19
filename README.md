@@ -20,8 +20,8 @@ make
 或
 
 ```
-./skynet/skynet etc/config.login
-./skynet/skynet etc/config.game
+./tools/startlogin.sh
+./tools/startgame.sh
 lua client.lua login 80 1
 lua client.lua roleinit 80 1 "metoo"
 ```
