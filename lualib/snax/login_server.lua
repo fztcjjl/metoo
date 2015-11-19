@@ -61,7 +61,6 @@ end
 
 local function launch_slave(auth_handler)
 	local function auth(fd, addr)
-		fd = assert(tonumber(fd))
 		LOG_INFO(string.format("connect from %s (fd = %d)", addr, fd))
 		socket.start(fd)
 

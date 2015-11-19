@@ -41,14 +41,14 @@ lua_cpath = skynetroot .. "luaclib/?.so;" .. "./luaclib/?.so"
 -- 后台模式
 --daemon = "./login.pid"
 
-port = 5188					-- 监听端口
+port = $METOO_PORT				-- 监听端口
 
-mysql_maxconn = 10			-- mysql数据库最大连接数
-mysql_host = "127.0.0.1"	-- mysql数据库主机
-mysql_port = 3306			-- mysql数据库端口
-mysql_db = "metoo"			-- mysql数据库库名
-mysql_user = "root"			-- mysql数据库帐号
-mysql_pwd = "123456"		-- mysql数据库密码
+mysql_maxconn = 10					-- mysql数据库最大连接数
+mysql_host = "$METOO_MYSQL_HOST"	-- mysql数据库主机
+mysql_port = $METOO_MYSQL_PORT		-- mysql数据库端口
+mysql_db = "$METOO_MYSQL_DB"		-- mysql数据库库名
+mysql_user = "$METOO_MYSQL_USER"	-- mysql数据库帐号
+mysql_pwd = "$METOO_MYSQL_PWD"		-- mysql数据库密码
 
 redis_maxinst = 1			-- redis最大实例数
 

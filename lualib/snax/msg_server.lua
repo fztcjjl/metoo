@@ -110,8 +110,8 @@ function server.login(username, secret)
 	assert(user_online[username] == nil)
 	user_online[username] = {
 		secret = secret,
-		version = 0,			-- 认证次数
-		index = 0,				-- 请求次数
+		version = 0,
+		index = 0,
 		username = username,
 		response = {},	-- response cache
 	}
@@ -256,8 +256,8 @@ function server.start(conf)
 		if p then
 			-- session can be reuse in the same connection
 			if p[3] == u.version then		-- 同一连接的请求，复用了先前的session
-				local last = u.response[session]
-				u.response[session] = nil
+				local last = u.response[session]	-- 上一次该session的应答缓存
+				u.response[session] = nil	-- 移除此应答缓存，老的应答缓存将被覆盖
 				p = nil
 				if last[2] == nil then
 					local error_msg = string.format("Conflict session %s", crypt.hexencode(session))
@@ -270,6 +270,7 @@ function server.start(conf)
 		if p == nil then
 			p = { fd }
 			u.response[session] = p	-- 缓存应答数据
+			-- 处理业务逻辑，并返回结果
 			local ok, result = pcall(conf.request_handler, u.username, message)
 			-- NOTICE: YIELD here, socket may close.
 			result = result or ""
@@ -298,7 +299,7 @@ function server.start(conf)
 		-- the return fd is p[1] (fd may change by multi request) check connect
 		fd = p[1]
 		if connection[fd] then
-			socketdriver.send(fd, p[2])
+			socketdriver.send(fd, p[2])		-- 发送应答包
 		end
 		p[1] = nil
 		retire_response(u)
