@@ -1,5 +1,4 @@
 local skynet = require "skynet"
-local snax = require "snax"
 local Entity = require "Entity"
 
 -- CommonEntity
@@ -8,10 +7,6 @@ local CommonEntity = class("CommonEntity", Entity)
 function CommonEntity:ctor()
 	CommonEntity.super.ctor(self)
 	self.type = 3
-end
-
-function CommonEntity:init()
-	self.pk, self.key, self.indexkey = skynet.call("dbmgr", "lua", "get_table_key", self.tbname, self.type)
 end
 
 -- 加载整张表数据
@@ -27,12 +22,12 @@ end
 
 --[[
 -- 将内存中的数据先同步回redis,再从redis加载到内存（该方法要不要待定）
-function CommonEntity:ReLoad()
+function CommonEntity:reLoad()
 
 end
 
 -- 卸载整张表数据
-function CommonEntity:UnLoad()
+function CommonEntity:unLoad()
 
 end
 --]]
