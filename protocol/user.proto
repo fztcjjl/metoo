@@ -9,6 +9,15 @@ message RoleInitResonpse {
 
 }
 
+// 角色改名
+message RoleRenameRequest {
+	required string name = 1;
+}
+
+message RoleRenameResponse {
+
+}
+
 message UserInfoRequest {
 	
 }

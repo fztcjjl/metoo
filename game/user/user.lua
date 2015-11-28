@@ -31,6 +31,13 @@ function response.RoleInitRequest(data)
 	return name, resp, errno
 end
 
+function response.RoleRenameRequest(data)
+	local args = pb_decode(data)
+	local errno = role_obj.req.rolerename(args.uid, args.name)
+	local name, resp = pb_encode("user.RoleRenameResponse", {})
+	return name, resp, errno
+end
+
 function response.UserInfoRequest(data)
 	local args = pb_decode(data)
 	local userinfo = user_dc.req.get(args.uid)

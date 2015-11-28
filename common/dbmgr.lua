@@ -534,7 +534,7 @@ function CMD.update(tbname, row, type, nosync)
 		skynet.call("dbsync", "lua", "sync", sql)
 	end
 
-	return result
+	return true
 end
 
 function CMD.get_table_key(tbname, type)

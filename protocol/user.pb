@@ -1,10 +1,13 @@
 
-Ã
+ü
 
 user.protouser"
 RoleInitRequest
 name (	"
-RoleInitResonpse"
+RoleInitResonpse"!
+RoleRenameRequest
+name (	"
+RoleRenameResponse"
 UserInfoRequest"g
 UserInfoResponse
 uid (

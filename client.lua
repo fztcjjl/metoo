@@ -195,6 +195,33 @@ function CMD.roleinit(token, sdkid, name)
 	end
 end
 
+function CMD.rolerename(token, sdkid, name)
+	CMD.login(token, sdkid, true)
+
+	local data = { name = name }
+	send_request(encode("user.RoleRenameRequest", data))
+	local ok, msg, sess = recv_response(read_package())
+	msg = decode(msg)
+	if msg.errmsg.code == 0 then
+		print("role rename succ")
+	else
+		print(string.format("error with code=%d", msg.errmsg.code))
+	end
+end
+
+function CMD.userinfo(token, sdkid)
+	CMD.login(token, sdkid, true)
+
+	send_request(encode("user.UserInfoRequest", {}))
+	local ok, msg, sess = recv_response(read_package())
+	msg = decode(msg)
+	if msg.errmsg.code == 0 then
+		print("userinfo succ")
+	else
+		print(string.format("error with code=%d", msg.errmsg.code))
+	end
+end
+
 local function start(cmd, ...)
 	if not cmd or cmd == "" then
 		cmd = "help"

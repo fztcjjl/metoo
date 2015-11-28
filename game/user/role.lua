@@ -36,3 +36,18 @@ function response.roleinit(uid, name)
 	end
 	return errno
 end
+
+function response.rolerename(uid, name)
+	local errno = E_SUCCESS
+	if not user_dc.req.check_role_exists(uid) then
+		LOG_ERROR("uid %d has not a role, role rename failed", uid)
+		return ErrorCode.E_ROLE_NOT_EXISTS
+	end
+
+	local ret = user_dc.req.setvalue(uid, "name", name)
+	
+	if not ret then
+		return ErrorCode.E_DB_ERROR
+	end
+	return errno
+end
