@@ -7,19 +7,11 @@ make
 ```
 
 ## Test
-
 将tools/metoo.sql导入到mysql<br />
 配置etc/config.test文件中的mysql连接信息<br />
-启动redis<br />
+
+```
 ./tools/redis.sh
-
-```
-./skynet/skynet etc/config.test
-```
-
-或
-
-```
 ./tools/startlogin.sh
 ./tools/startgame.sh
 lua client.lua login 80 1
