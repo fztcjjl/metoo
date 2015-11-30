@@ -1,26 +1,26 @@
 local skynet = require "skynet"
 local snax = require "snax"
-local entity = require "Entity"
+local EntityFactory = require "EntityFactory"
 
-local EntConfig
-local EntUser
-local EntItem
-local EntRanking
+local entConfig
+local entUser
+local entItem
+local entRanking
 
 function init(...)
-	EntConfig = entity.Get("s_config")
-	EntConfig:Init()
-	EntConfig:Load()
+	entConfig = EntityFactory.get("s_config")
+	entConfig:init()
+	entConfig:load()
 
-	EntRanking = entity.Get("d_ranking")
-	EntConfig:Init()
-	EntConfig:Load()
+	entRanking = EntityFactory.get("d_ranking")
+	entConfig:init()
+	entConfig:load()
 	
-	EntUser = entity.Get("d_user")
-	EntUser:Init()
+	entUser = EntityFactory.get("d_user")
+	entUser:init()
 
-	EntItem = entity.Get("d_item")
-	EntItem:Init()
+	entItem = EntityFactory.get("d_item")
+	entItem:init()
 end
 
 function exit(...)
@@ -33,53 +33,53 @@ end
 
 function response.load(uid)
 	if uid then
-		EntUser:Load(uid)
+		entUser:load(uid)
 	end
 end
 
 function response.unload(uid)
 	if uid then
-		EntUser:UnLoad(uid)
+		entUser:unload(uid)
 	end
 end
 
 function response.user_get(uid)
-	return EntUser:Get(uid)
+	return entUser:get(uid)
 end
 
 function response.user_setvalue(uid, key)
-	return EntUser:SetValue(uid, key, value)
+	return entUser:setValue(uid, key, value)
 end
 
 function response.user_getvalue(uid, key)
-	return EntUser:GetValue(uid, key)
+	return entUser:getValue(uid, key)
 end
 
 function response.user_addvalue(uid, key, value)
-	local v = EntUser:GetValue(uid, key)
+	local v = entUser:getValue(uid, key)
 	v = v + value
-	local ret = EntUser:SetValue(uid, key, v)
+	local ret = entUser:setValue(uid, key, v)
 	return ret, v
 end
 
 function response.user_add(row)
-	return EntUser:Add(row)
+	return entUser:add(row)
 end
 
 function response.user_delete(uid)
 	local row = { uid = uid }
-	return EntUser:Delete(row)
+	return entUser:delete(row)
 end
 
 
 function response.item_get(uid)
-	return EntItem:Get(uid)
+	return entItem:get(uid)
 end
 
 function response.item_getvalue(uid, id, key)
-	return EntItem:GetValue(uid, id, key)
+	return entItem:getValue(uid, id, key)
 end
 
 function response.item_setvalue(uid, id, key, value)
-	return EntItem:SetValue(uid, id, key, value)
+	return entItem:setValue(uid, id, key, value)
 end

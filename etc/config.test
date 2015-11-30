@@ -6,17 +6,20 @@ harbor = 0
 start = "main"	-- main script
 bootstrap = "snlua bootstrap"	-- The service for bootstrap
 
+log_dirname = "log"
+log_basename = "test"
+
 -- 集群名称配置文件
 cluster = "./cluster/clustername.lua"
 
-loginservice = "./common/?.lua;" ..
+testservice = "./test/?.lua;" ..
+			   "./common/?.lua;" ..
 			   "./common/cluster/?.lua;" ..
-			   "./test/?.lua;" ..
 			   "./test/datacenter/?.lua"
 
 -- LUA服务所在位置
-luaservice = skynetroot .. "service/?.lua;" .. loginservice
-snax = loginservice
+luaservice = skynetroot .. "service/?.lua;" .. testservice
+snax = testservice
 
 -- 用于加载LUA服务的LUA代码
 lualoader = skynetroot .. "lualib/loader.lua"
@@ -35,25 +38,20 @@ lua_path = skynetroot .. "lualib/?.lua;" ..
 -- 将添加到 package.cpath 中的路径，供 require 调用。
 lua_cpath = skynetroot .. "luaclib/?.so;" .. "./luaclib/?.so"
 
-port = 5188					-- 监听端口
+-- 后台模式
+--daemon = "./login.pid"
 
-mysql_maxconn = 10			-- mysql数据库最大连接数
-mysql_host = "127.0.0.1"	-- mysql数据库主机
-mysql_port = 3306			-- mysql数据库端口
-mysql_db = "metoo"			-- mysql数据库库名
-mysql_user = "root"			-- mysql数据库帐号
-mysql_pwd = "123456"		-- mysql数据库密码
+port = $METOO_PORT				-- 监听端口
 
-redis_maxinst = 3			-- redis最大实例数
+mysql_maxconn = 10					-- mysql数据库最大连接数
+mysql_host = "$METOO_MYSQL_HOST"	-- mysql数据库主机
+mysql_port = $METOO_MYSQL_PORT		-- mysql数据库端口
+mysql_db = "$METOO_MYSQL_DB"		-- mysql数据库库名
+mysql_user = "$METOO_MYSQL_USER"	-- mysql数据库帐号
+mysql_pwd = "$METOO_MYSQL_PWD"		-- mysql数据库密码
+
+redis_maxinst = 1			-- redis最大实例数
 
 redis_host1 = "127.0.0.1"	-- redis数据库IP
 redis_port1 = 6379			-- redis数据库端口
 redis_auth1 = "123456"		-- redis数据库密码
-
-redis_host2 = "127.0.0.1"	-- redis数据库IP
-redis_port2 = 6380			-- redis数据库端口
-redis_auth2 = "123456"		-- redis数据库密码
-
-redis_host3 = "127.0.0.1"	-- redis数据库IP
-redis_port3 = 6381			-- redis数据库端口
-redis_auth3 = "123456"		-- redis数据库密码
