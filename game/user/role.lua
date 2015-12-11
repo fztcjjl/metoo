@@ -28,11 +28,16 @@ function response.roleinit(uid, name)
 	}
 
 	local ret = user_dc.req.add(data)
+
+	if ret then
+		local userinfo = user_dc.req.get(args.uid)
+		local name, resp = pb_encode("user.UserInfoResponse", userinfo)
+	end
 	
 	-- 初始化角色其他数据
 
 	if not ret then
-		return ErrorCode.E_DB_ERROR
+		errno = ErrorCode.E_DB_ERROR
 	end
 	return errno
 end

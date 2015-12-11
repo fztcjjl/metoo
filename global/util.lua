@@ -1,5 +1,6 @@
 local skynet = require "skynet"
 local protobuf = require "protobuf"
+local socketdriver = require "socketdriver"
 
 function do_redis(args, uid)
 	local cmd = assert(args[1])
@@ -78,4 +79,16 @@ end
 
 function check_user_online(uid)
 	return skynet.call("gated", "lua", "is_online", uid)
+end
+
+function send_client(fd, data)
+	protobuf.register_file("./protocol/netmsg.pb")
+	local msg = protobuf.encode("netmsg.NetMsg", data)
+	if not msg then
+		LOG_ERROR("protobuf.encode error")
+		error("protobuf.encode error")
+	end
+	msg = msg .. string.pack(">BI4", 1, 888)
+	msg = string.pack(">s2", msg)
+	socketdriver.send(fd, msg)	
 end

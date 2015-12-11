@@ -8,6 +8,8 @@ local cs = queue()
 local UID
 local SUB_ID
 local SECRET
+
+local fd
 --local user_dc
 local afktime = 0
 
@@ -132,7 +134,8 @@ function CMD.login(source, uid, subid, secret)
 end
 
 -- 玩家登录游服，握手成功后调用
-function CMD.auth(source, uid)
+function CMD.auth(source, uid, client_fd)
+	fd = client_fd
 	LOG_INFO(string.format("%d is real login", uid))
 	LOG_INFO("call dcmgr to load user data uid=%d", uid)
 	skynet.call("dcmgr", "lua", "load", uid)	-- 加载玩家数据，重复加载是无害的
@@ -217,7 +220,8 @@ local function msg_dispatch(netmsg)
 			obj.req[method], {
 				name = name,
 				payload = netmsg.payload,
-				uid = uid
+				uid = uid,
+				fd = fd
 			}
 		)
 

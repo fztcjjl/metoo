@@ -200,7 +200,7 @@ function server.start(conf)
 		u.ip = addr
 		connection[fd] = u
 
-		auth_handler(username)
+		auth_handler(username, fd)
 	end
 
 	local function auth(fd, addr, msg, sz)
@@ -225,84 +225,12 @@ function server.start(conf)
 	end
 
 	local request_handler = assert(conf.request_handler)
-
-	-- u.response is a struct { return_fd , response, version, index }
-	local function retire_response(u)
-		if u.index >= expired_number * 2 then
-			local max = 0
-			local response = u.response
-			for k,p in pairs(response) do
-				if p[1] == nil then
-					-- request complete, check expired
-					if p[4] < expired_number then
-						response[k] = nil
-					else
-						p[4] = p[4] - expired_number
-						if p[4] > max then
-							max = p[4]
-						end
-					end
-				end
-			end
-			u.index = max + 1
-		end
-	end
-
+	
 	local function do_request(fd, message)
 		local u = assert(connection[fd], "invalid fd")
 		local session = string.unpack(">I4", message, -4)
 		message = message:sub(1,-5)
-		local p = u.response[session]
-		if p then
-			-- session can be reuse in the same connection
-			if p[3] == u.version then		-- 同一连接的请求，复用了先前的session
-				local last = u.response[session]	-- 上一次该session的应答缓存
-				u.response[session] = nil	-- 移除此应答缓存，老的应答缓存将被覆盖
-				p = nil
-				if last[2] == nil then
-					local error_msg = string.format("Conflict session %s", crypt.hexencode(session))
-					skynet.error(error_msg)
-					error(error_msg)
-				end
-			end
-		end
-
-		if p == nil then
-			p = { fd }
-			u.response[session] = p	-- 缓存应答数据
-			-- 处理业务逻辑，并返回结果
-			local ok, result = pcall(conf.request_handler, u.username, message)
-			-- NOTICE: YIELD here, socket may close.
-			result = result or ""
-			if not ok then
-				skynet.error(result)
-				result = string.pack(">BI4", 0, session)
-			else
-				result = result .. string.pack(">BI4", 1, session)
-			end
-
-			p[2] = string.pack(">s2",result)
-			p[3] = u.version
-			p[4] = u.index
-		else
-			-- update version/index, change return fd.
-			-- resend response.
-			p[1] = fd
-			p[3] = u.version
-			p[4] = u.index
-			if p[2] == nil then
-				-- already request, but response is not ready
-				return
-			end
-		end
-		u.index = u.index + 1
-		-- the return fd is p[1] (fd may change by multi request) check connect
-		fd = p[1]
-		if connection[fd] then
-			socketdriver.send(fd, p[2])		-- 发送应答包
-		end
-		p[1] = nil
-		retire_response(u)
+		pcall(conf.request_handler, u.username, message)
 	end
 
 	local function request(fd, msg, sz)
