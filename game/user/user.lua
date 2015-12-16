@@ -43,37 +43,6 @@ function response.unload(uid)
 	EntUser:unload(uid)
 end
 
-function response.RoleInitRequest(data)
-	local args = pb_decode(data)
-	local uid = data.uid
-	local fd = data.fd
-	if user_dc.req.check_role_exists(uid) then
-		LOG_ERROR("uid %d has role, role init failed", uid)
-		return
-	end
-
-	local row = {
-		uid = uid,
-		name = args.name,
-		level = 1,
-		exp = 0,
-		rtime = os.time(),
-		ltime = os.time()
-	}
-
-	local ret = user_dc.req.add(row)
-
-	init_building(uid)
-
-	if ret then
-		local userinfo = user_dc.req.get(uid)
-		local proto = "user.UserInfoResponse"
-		local payload = pb_encode(proto, userinfo)
-
-		send_client(data.fd, proto, payload)
-	end
-end
-
 function response.RoleRenameRequest(data)
 	local args = pb_decode(data)
 	local uid = data.uid
@@ -90,8 +59,7 @@ function response.RoleRenameRequest(data)
 		return
 	end
 
-	local userinfo = user_dc.req.get(uid)
-	send_client(data.fd, "user.UserInfoResponse", userinfo)
+	send_client(data.fd, "user.UserInfoResponse", { name = args.name })
 end
 
 function response.UserInfoRequest(data)

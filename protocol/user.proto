@@ -1,32 +1,19 @@
 package user;
 
-// 角色初始化
-message RoleInitRequest {
-	required string name = 1;
-}
-
-message RoleInitResonpse {
-
-}
-
-// 角色改名
-message RoleRenameRequest {
-	required string name = 1;
-}
-
-message RoleRenameResponse {
-
-}
-
 message UserInfoRequest {
 	
 }
 
 message UserInfoResponse {
-	required int32 uid = 1;
-	required string name = 2;
-	required int32 level = 3;
-	required int32 exp = 4;
-	required int32 rtime = 5;
-	required int32 ltime = 6;
+	optional int32 uid = 1;
+	optional string name = 2;
+	optional int32 level = 3;
+	optional int32 exp = 4;
+	optional int32 rtime = 5;
+	optional int32 ltime = 6;
+}
+
+// 角色改名
+message RoleRenameRequest {
+	required string name = 1;
 }
