@@ -174,6 +174,7 @@ function server.start(conf)
 	handler.error = handler.disconnect
 
 	local auth_handler = conf.auth_handler
+	local online_handler = conf.online_handler
 
 	-- atomic , no yield
 	local function do_auth(fd, message, addr)
@@ -221,6 +222,13 @@ function server.start(conf)
 
 		if close then
 			gateserver.closeclient(fd)
+		else
+			
+			local username = string.match(message, "([^:]*):([^:]*):([^:]*)")
+			
+			local uid = server.userid(username)
+			uid = tonumber(uid)
+			online_handler(uid, fd)
 		end
 	end
 

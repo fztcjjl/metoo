@@ -10,9 +10,9 @@ user.protouser"
 RoleRenameResponse"
 UserInfoRequest"g
 UserInfoResponse
-uid (
-name (	
-level (
-exp (
-rtime (
-ltime (
+uid (
+name (	
+level (
+exp (
+rtime (
+ltime (

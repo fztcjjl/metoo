@@ -1,39 +1,10 @@
 package netmsg;
 
-message Header {
-	optional int32 uid = 1;
-}
-
-message ErrMsg {
-	optional int32 code = 1 [default = 0];
-	optional string desc = 2;
-}
-
 message NetMsg {
-	optional Header head = 1;
-	optional string name = 2;
-	optional bytes payload = 3;
-	optional ErrMsg errmsg = 4;
+	required string name = 1;
+	required bytes payload = 2;
 }
 
 message LogoutRequest {
 	
-}
-
-// 客户端请求服务端推送消息
-// 服务端若无需要推送的消息,不会马上应答,直到有需要推送的消息
-// 服务器一次可能推送多条封包消息
-// 客户端收到ServerPushResponse，需要再次发送ServerPushRequest，否则后续的通知不会继续发送
-// 即客户端需要始终保持一个ServerPushRequest在服务端上
-message ServerPushRequest {
-	
-}
-
-message PushItem {
-	optional string name = 1;
-	optional bytes payload = 2;
-}
-
-message ServerPushResponse {
-	repeated PushItem push_items = 1;
 }

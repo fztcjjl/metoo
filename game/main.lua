@@ -4,10 +4,12 @@ local cluster = require "cluster"
 
 local config = {
 	{ name = "s_config", key = "id" },
+	{ name = "s_roleinit", key = "id" },
 }
 
 local user = {
 	{ name = "d_user", key = "uid" },
+	{ name = "d_building", key = "id", indexkey = "uid" },
 }
 
 local common = {
@@ -25,6 +27,8 @@ skynet.start(function()
 
 	local dcmgr = skynet.uniqueservice("dcmgr")
 	skynet.call(dcmgr, "lua", "start")
+
+	skynet.uniqueservice("online")
 
 	local gate = skynet.uniqueservice("gated")		-- 启动游戏服务器
 	skynet.call(gate, "lua", "init")				-- 初始化，预先分配若干agent

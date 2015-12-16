@@ -1,0 +1,18 @@
+package building;
+
+// 建筑信息
+message BuildingInfo {
+	required uint32 id = 1;
+	required uint32 uid = 2;
+	required uint32 type = 3;
+	required uint32 level = 4;
+	required uint32 storage = 5;
+	required uint32 end_increase_time = 6;
+	required uint32 output_time = 7;
+	required uint32 state_end_time = 8;
+	required uint32 state = 9;
+}
+
+message BuildingInfoResponse {
+	repeated BuildingInfo buildings = 1;
+}

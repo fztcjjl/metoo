@@ -165,7 +165,7 @@ end
 
 local function encode(name, data)
 	local payload = protobuf.encode(name, data)
-	local netmsg = { head = { uid = UID }, name = name, payload = payload }
+	local netmsg = { name = name, payload = payload }
 	local pack = protobuf.encode("netmsg.NetMsg", netmsg)
 	return pack
 end
@@ -173,11 +173,6 @@ end
 local function decode(data)
 	local netmsg = protobuf.decode("netmsg.NetMsg", data)
 
-	if netmsg.errmsg.code ~= 0 then
-		print("error:"..netmsg.errmsg.code.. "-->" .. netmsg.errmsg.desc)
-	elseif netmsg.name and netmsg.payload then
-		print(netmsg.name, protobuf.decode(netmsg.name, netmsg.payload))
-	end
 	return netmsg
 end
 
@@ -188,10 +183,8 @@ function CMD.roleinit(token, sdkid, name)
 	send_request(encode("user.RoleInitRequest", data))
 	local ok, msg, sess = recv_response(read_package())
 	msg = decode(msg)
-	if msg.errmsg.code == 0 then
+	if msg then
 		print("role init succ")
-	else
-		print(string.format("error with code=%d", msg.errmsg.code))
 	end
 end
 
@@ -202,10 +195,8 @@ function CMD.rolerename(token, sdkid, name)
 	send_request(encode("user.RoleRenameRequest", data))
 	local ok, msg, sess = recv_response(read_package())
 	msg = decode(msg)
-	if msg.errmsg.code == 0 then
+	if msg then
 		print("role rename succ")
-	else
-		print(string.format("error with code=%d", msg.errmsg.code))
 	end
 end
 
@@ -215,10 +206,8 @@ function CMD.userinfo(token, sdkid)
 	send_request(encode("user.UserInfoRequest", {}))
 	local ok, msg, sess = recv_response(read_package())
 	msg = decode(msg)
-	if msg.errmsg.code == 0 then
+	if msg then
 		print("userinfo succ")
-	else
-		print(string.format("error with code=%d", msg.errmsg.code))
 	end
 end
 

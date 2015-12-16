@@ -4,6 +4,7 @@ local EntityFactory = require "EntityFactory"
 
 local entUser
 local entUserCustom
+local entRoleinit
 
 function init(...)
 	entUser = EntityFactory.get("d_user")
@@ -12,6 +13,10 @@ function init(...)
 	entUserCustom = EntityFactory.get("d_user_custom")
 	entUserCustom:init()
 	entUserCustom:load()
+
+	entRoleinit = EntityFactory.get("s_roleinit")
+	entRoleinit:init()
+	entRoleinit:load()
 end
 
 function exit(...)
@@ -54,6 +59,10 @@ end
 
 function response.get(uid)
 	return entUser:get(uid)
+end
+
+function response.get_roleinit(id)
+	return entRoleinit:get(id)
 end
 
 function response.check_rolename_exists(name)

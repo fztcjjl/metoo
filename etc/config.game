@@ -17,6 +17,7 @@ log_basename = "game"
 
 gameservice = "./game/?.lua;" ..
 			  "./game/user/?.lua;" ..
+			  "./game/building/?.lua;" ..
 			  "./common/?.lua;" ..
 			  "./common/cluster/?.lua;" ..
 			  "./common/datacenter/?.lua"

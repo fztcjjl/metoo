@@ -62,11 +62,15 @@ function pb_encode(name, msg)
 	if not data then
 		LOG_ERROR("pb_encode error")
 	end
-	return name, data
+	return data
 end
 
 function pb_decode(data)
 	local msg = protobuf.decode(data.name, data.payload)
+	if not msg then
+		LOG_ERROR("pb_decode error")
+		return
+	end
 	if data.uid then
 		msg.uid = data.uid
 	end
@@ -81,14 +85,19 @@ function check_user_online(uid)
 	return skynet.call("gated", "lua", "is_online", uid)
 end
 
-function send_client(fd, data)
-	protobuf.register_file("./protocol/netmsg.pb")
-	local msg = protobuf.encode("netmsg.NetMsg", data)
+protobuf.register_file("./protocol/netmsg.pb")
+protobuf.register_file("./protocol/user.pb")
+protobuf.register_file("./protocol/building.pb")
+
+function send_client(fd, proto, data)
+	local payload = pb_encode(proto, data)
+	local msg = protobuf.encode("netmsg.NetMsg", { name = proto, payload = payload })
 	if not msg then
 		LOG_ERROR("protobuf.encode error")
 		error("protobuf.encode error")
 	end
-	msg = msg .. string.pack(">BI4", 1, 888)
+
+	msg = msg .. string.pack(">BI4", 1, 9)
 	msg = string.pack(">s2", msg)
 	socketdriver.send(fd, msg)	
 end

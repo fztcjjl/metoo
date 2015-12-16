@@ -1,0 +1,43 @@
+package config;
+message s_c_buildingInfo {
+	required uint32 id = 1;
+	required uint32 type = 2;
+	required uint32 level = 3;
+	required string csb_path = 4;
+}
+message s_c_operationInfo {
+	required uint32 id = 1;
+}
+message s_configInfo {
+	required uint32 id = 1;
+	required uint32 data1 = 2;
+	required uint32 data2 = 3;
+	required uint32 data3 = 4;
+	required uint32 data4 = 5;
+	required uint32 data5 = 6;
+	required string str1 = 7;
+	required string str2 = 8;
+	required string str3 = 9;
+	required string str4 = 10;
+	required string str5 = 11;
+	required string description = 12;
+}
+message s_itemtypeInfo {
+	required uint32 id = 1;
+	required string name = 2;
+}
+message s_roleinitInfo {
+	required uint32 id = 1;
+	required uint32 data1 = 2;
+	required uint32 data2 = 3;
+	required string str1 = 4;
+	required string str2 = 5;
+	required string description = 6;
+}
+message all_config {
+	repeated s_c_buildingInfo s_c_building = 1;
+	repeated s_c_operationInfo s_c_operation = 2;
+	repeated s_configInfo s_config = 3;
+	repeated s_itemtypeInfo s_itemtype = 4;
+	repeated s_roleinitInfo s_roleinit = 5;
+}

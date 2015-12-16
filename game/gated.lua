@@ -34,6 +34,9 @@ function server.auth_handler(username, fd)
 	skynet.call(users[uid].agent, "lua", "auth", uid, fd)	-- 通知agent认证成功，玩家真正处于登录状态了
 end
 
+function server.online_handler(uid, fd)
+	skynet.call(users[uid].agent, "lua", "online", uid, fd)
+end
 -- login server disallow multi login, so login_handler never be reentry
 -- call by login server
 -- 内部命令login处理函数

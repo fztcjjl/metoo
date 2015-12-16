@@ -4,14 +4,33 @@ local protobuf = require "protobuf"
 
 local user_dc
 local role_obj
+local build_dc
 
 function init(...)
 	protobuf.register_file("protocol/user.pb")
 	user_dc = snax.uniqueservice("userdc")
 	role_obj = snax.uniqueservice("role")
+	build_dc = snax.uniqueservice("buildingdc")
 end
 
 function exit(...)
+end
+
+local function init_building(uid)
+
+	local init_data = user_dc.req.get_roleinit(1)
+
+	local building_info = string.split(init_data.str1, ";")
+
+	for _, v in pairs(building_info) do
+		local info = string.split(v, ",")
+		local row = { uid = uid, type = tonumber(info[1]), level = tonumber(info[2]) } 
+		build_dc.req.add(row)
+	end
+
+	LOG_INFO("init_building ok, uid %d", uid)
+
+	return true
 end
 
 function response.load(uid)
@@ -44,22 +63,14 @@ function response.RoleInitRequest(data)
 
 	local ret = user_dc.req.add(row)
 
+	init_building(uid)
+
 	if ret then
 		local userinfo = user_dc.req.get(uid)
-		local name, resp = pb_encode("user.UserInfoResponse", userinfo)
+		local proto = "user.UserInfoResponse"
+		local payload = pb_encode(proto, userinfo)
 
-		local function format_errmsg(errno, errmsg)
-			local err = {}
-			err.code = errno or 0
-			err.desc = errmsg
-			return err
-		end
-		local x = {}
-		x.name = name
-		x.payload = resp
-		data.errmsg = format_errmsg(0)
-
-		send_client(data.fd, x)
+		send_client(data.fd, proto, payload)
 	end
 end
 
@@ -80,40 +91,30 @@ function response.RoleRenameRequest(data)
 	end
 
 	local userinfo = user_dc.req.get(uid)
-	local name, resp = pb_encode("user.UserInfoResponse", userinfo)
-
-	local function format_errmsg(errno, errmsg)
-		local err = {}
-		err.code = errno or 0
-		err.desc = errmsg
-		return err
-	end
-	local x = {}
-	x.name = name
-	x.payload = resp
-	data.errmsg = format_errmsg(0)
-
-	send_client(data.fd, x)
+	send_client(data.fd, "user.UserInfoResponse", userinfo)
 end
 
 function response.UserInfoRequest(data)
 	local args = pb_decode(data)
 	local userinfo = user_dc.req.get(args.uid)
-	print(userinfo)
-	local name, resp = pb_encode("user.UserInfoResponse", userinfo)
+	send_client(data.fd, "user.UserInfoResponse", userinfo)
+end
 
-	local function format_errmsg(errno, errmsg)
-		local err = {}
-		err.code = errno or 0
-		err.desc = errmsg
-		return err
+function response.roleinit(uid)
+	if user_dc.req.check_role_exists(uid) then
+		return
 	end
 
-	local x = {}
-	x.name = name
-	x.payload = resp
-	data.errmsg = format_errmsg(0)
+	local row = {
+		uid = uid,
+		name = tostring(uid),
+		level = 1,
+		exp = 0,
+		rtime = os.time(),
+		ltime = os.time()
+	}
 
-	send_client(data.fd, x)
-	-- return name, resp
+	local ret = user_dc.req.add(row)
+
+	init_building(uid)
 end
