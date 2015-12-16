@@ -8,7 +8,6 @@ make
 
 ## Test
 将tools/metoo.sql导入到mysql<br />
-配置etc/config.test文件中的mysql连接信息<br />
 
 ```
 ./tools/redis.sh
