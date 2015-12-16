@@ -15,7 +15,6 @@ make
 ./tools/startlogin.sh
 ./tools/startgame.sh
 lua client.lua login 80 1
-lua client.lua roleinit 80 1 "metoo"
 ```
 
 ##About skynet
