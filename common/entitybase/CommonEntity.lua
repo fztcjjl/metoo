@@ -126,7 +126,7 @@ end
 
 function CommonEntity:getValue(id, field)
 	local record = self:get(id)
-	if not record then
+	if record then
 		return record[field]
 	end
 end
