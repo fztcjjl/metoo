@@ -4,7 +4,7 @@ PLAT ?= linux
 SHARED := -fPIC --shared
 LUA_CLIB_PATH ?= luaclib
 
-CFLAGS = -g -O2 -Wall
+CFLAGS = -g -O2 -Wall -Iskynet/3rd/lua -Lskynet/3rd/lua
 
 LUA_CLIB = protobuf log
 
