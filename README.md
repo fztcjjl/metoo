@@ -16,5 +16,5 @@ make
 lua client.lua login 80 1
 ```
 
-##About skynet
+## About skynet
 [https://github.com/cloudwu/skynet](https://github.com/cloudwu/skynet)<br /> 
