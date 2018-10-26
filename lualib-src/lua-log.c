@@ -14,6 +14,11 @@
 #include <pthread.h>
 #include <assert.h>
 
+#ifdef __APPLE__
+  #define fwrite_unlocked fwrite
+  #define fflush_unlocked fflush
+#endif
+
 #define ONE_MB	(1024*1024)
 #define DEFAULT_ROLL_SIZE (1024*ONE_MB)		// 日志文件达到1G，滚动一个新文件
 #define DEFAULT_BASENAME "default"

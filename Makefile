@@ -1,10 +1,11 @@
 .PHONY: all skynet clean
 
-PLAT ?= linux
+PLAT ?= macosx
 SHARED := -fPIC --shared
 LUA_CLIB_PATH ?= luaclib
 
 CFLAGS = -g -O2 -Wall
+LIBS = -llua
 
 LUA_CLIB = protobuf log
 
@@ -27,7 +28,7 @@ $(LUA_CLIB_PATH)/protobuf.so : | $(LUA_CLIB_PATH)
 	cd lualib-src/pbc && $(MAKE) lib && cd binding/lua53 && $(MAKE) && cd ../../../.. && cp lualib-src/pbc/binding/lua53/protobuf.so $@
 
 $(LUA_CLIB_PATH)/log.so : lualib-src/lua-log.c | $(LUA_CLIB_PATH)
-	$(CC) $(CFLAGS) $(SHARED) $^ -o $@
+	$(CC) $(CFLAGS) $(SHARED) $(LIBS) $^ -o $@
 
 clean :
 	cd skynet && $(MAKE) clean
