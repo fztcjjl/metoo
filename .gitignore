@@ -1,0 +1,10 @@
+*.o
+*.a
+*.so
+
+.idea
+.vscode
+.DS_Store
+
+log
+luaclib
