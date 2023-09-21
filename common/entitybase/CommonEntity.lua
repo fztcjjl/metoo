@@ -22,12 +22,12 @@ end
 
 --[[
 -- 将内存中的数据先同步回redis,再从redis加载到内存（该方法要不要待定）
-function CommonEntity:reLoad()
+function CommonEntity:reload()
 
 end
 
 -- 卸载整张表数据
-function CommonEntity:unLoad()
+function CommonEntity:unload()
 
 end
 --]]

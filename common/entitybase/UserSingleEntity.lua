@@ -29,7 +29,7 @@ function UserSingleEntity:load(uid)
 end
 
 -- 将内存中的数据先同步回redis,再从redis加载到内存（该方法要不要待定）
-function UserSingleEntity:reLoad(uid)
+function UserSingleEntity:reload(uid)
 
 end
 
