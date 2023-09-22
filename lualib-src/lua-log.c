@@ -383,12 +383,14 @@ int linit(lua_State *L)
 		strncpy(inst.dirname, DEFAULT_DIRNAME, sizeof(inst.dirname));
 	else
 		strncpy(inst.dirname, dirname, sizeof(inst.dirname));
+	inst.dirname[sizeof(inst.dirname)-1] = '\0';
 
 	const char *basename = lua_tolstring(L, 5, NULL);
 	if (basename == NULL)
 		strncpy(inst.basename, DEFAULT_BASENAME, sizeof(inst.basename));
 	else
 		strncpy(inst.basename, basename, sizeof(inst.basename));
+	inst.basename[sizeof(inst.basename)-1] = '\0';
 
 	if (pthread_mutex_init(&inst.mutex, NULL) != 0)
 	{
