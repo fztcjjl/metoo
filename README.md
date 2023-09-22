@@ -13,7 +13,7 @@ make
 ./tools/redis.sh
 ./tools/startlogin.sh
 ./tools/startgame.sh
-lua client.lua login 80 1
+./skynet/3rd/lua/lua client.lua login 80 1
 ```
 
 ## About skynet

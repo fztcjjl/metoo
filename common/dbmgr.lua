@@ -364,7 +364,7 @@ function CMD.get_user_multi(tbname, uid, id, fields)
 					result[v] = t[id][v]
 				end
 			else
-				result = t[id]
+				result = t[id] or {}
 			end
 		else
 			if fields then
