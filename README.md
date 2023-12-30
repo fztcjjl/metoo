@@ -1,7 +1,10 @@
+**该项目已被归档，您可关注我的另一个项目 Quix，metoo 的升级版。[https://github.com/iobrother/quix](https://github.com/iobrother/quix)**
+
+**该项目已被归档，您可关注我的另一个项目 Quix，metoo 的升级版。[https://github.com/iobrother/quix](https://github.com/iobrother/quix)**
+
+**该项目已被归档，您可关注我的另一个项目 Quix，metoo 的升级版。[https://github.com/iobrother/quix](https://github.com/iobrother/quix)**
+
 ## Build
-
-该项目已被归档，您可关注我的另一个项目Quix，metoo的升级版。[https://github.com/iobrother/quix](https://github.com/iobrother/quix)
-
 ```
 git clone https://github.com/fztcjjl/metoo.git
 cd metoo
